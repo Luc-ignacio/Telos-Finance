@@ -1,0 +1,134 @@
+<template>
+  <div
+    class="bg-[url(~/assets/images/b3-sign.png)] bg-neutral-900 bg-cover bg-right bg-no-repeat flex w-screen h-screen"
+  >
+    <div class="w-[50%] h-screen flex items-center justify-center">
+      <div
+        class="bg-white/80 w-[30rem] min-h-[30rem] rounded-2xl px-10 flex items-center justify-center gap-5"
+      >
+        <Form
+          v-slot="$form"
+          :resolver="resolver"
+          :initialValues="initialValues"
+          @submit="onFormSubmit"
+          class="flex flex-col gap-5 w-full"
+        >
+          <div class="flex flex-col gap-1">
+            <InputText
+              name="firstName"
+              type="text"
+              placeholder="First Name"
+              fluid
+            />
+            <Message
+              v-if="$form.firstName?.invalid"
+              severity="error"
+              size="small"
+              variant="simple"
+              >{{ $form.firstName.error?.message }}</Message
+            >
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <InputText
+              name="lastName"
+              type="text"
+              placeholder="Last Name"
+              fluid
+            />
+            <Message
+              v-if="$form.lastName?.invalid"
+              severity="error"
+              size="small"
+              variant="simple"
+              >{{ $form.lastName.error?.message }}</Message
+            >
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <InputText name="email" type="text" placeholder="Email" fluid />
+            <Message
+              v-if="$form.email?.invalid"
+              severity="error"
+              size="small"
+              variant="simple"
+              >{{ $form.email.error?.message }}</Message
+            >
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <Password
+              name="password"
+              placeholder="Password"
+              :feedback="false"
+              fluid
+            />
+            <template v-if="$form.password?.invalid">
+              <Message
+                v-for="(error, index) of $form.password.errors"
+                :key="index"
+                severity="error"
+                size="small"
+                variant="simple"
+                >{{ error.message }}</Message
+              >
+            </template>
+          </div>
+          <Button type="submit" severity="secondary" label="Submit" />
+        </Form>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+definePageMeta({
+  layout: false,
+});
+
+import { z } from "zod";
+import { zodResolver } from "@primevue/forms/resolvers/zod";
+
+const toast = useToast();
+
+const initialValues = ref({
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+});
+
+const resolver = ref(
+  zodResolver(
+    z.object({
+      firstName: z.string().min(1, { message: "First Name is required" }),
+      lastName: z.string().min(1, { message: "Last Name is required" }),
+      email: z
+        .email({ message: "Invalid email address" })
+        .min(1, { message: "Email is required" }),
+      password: z
+        .string()
+        .min(3, { message: "Minimum 3 characters" })
+        .max(8, { message: "Maximum 8 characters" })
+        .refine((value) => /[a-z]/.test(value), {
+          message: "Must have a lowercase letter",
+        })
+        .refine((value) => /[A-Z]/.test(value), {
+          message: "Must have an uppercase letter",
+        }),
+    })
+  )
+);
+
+const onFormSubmit = ({ valid, values }) => {
+  if (valid) {
+    toast.add({
+      severity: "success",
+      summary: "Form is submitted.",
+      life: 3000,
+    });
+  }
+
+  console.log({ values });
+};
+</script>
