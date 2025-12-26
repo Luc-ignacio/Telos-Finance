@@ -32,7 +32,7 @@ definePageMeta({
   layout: false,
 });
 
-import { userStore } from "~/stores/user";
+import { userStore } from "../stores/user";
 
 const UserStore = userStore();
 </script>
