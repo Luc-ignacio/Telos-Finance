@@ -30,6 +30,8 @@ export default defineNuxtConfig({
     "@primevue/nuxt-module",
     "@prisma/nuxt",
     "@nuxtjs/supabase",
+    "@pinia/nuxt",
+    "@nuxt/icon",
   ],
 
   primevue: {
@@ -49,6 +51,9 @@ export default defineNuxtConfig({
   supabase: {
     url: process.env.SUPABASE_URL,
     key: process.env.SUPABASE_ANON_KEY,
-    redirect: false,
+    redirectOptions: {
+      login: "/login",
+      callback: "/auth/callback",
+    },
   },
 });

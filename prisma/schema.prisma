@@ -10,9 +10,87 @@ datasource db {
 
 model User {
   id        String   @id @default(uuid())
-  firstName String
-  lastName  String
+  name      String
   email     String   @unique
+  avatar    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
+  Wallets   Wallet[]
+}
+
+model Wallet {
+  id        String    @id @default(uuid())
+  name      String
+  userId    String
+  User      User      @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt()
+  Holdings  Holding[]
+}
+
+enum AssetClass {
+  EQUITY // Stocks, Ações
+  FIXED_INCOME // Bonds, Renda Fixa, Tesouro Direto
+  REAL_ESTATE // REITs, FIIs
+  FUNDS // Mutual Funds, Managed Funds, Fundos de Investimento
+  ETF // ETFs
+  CASH // Cash, Saldo em Conta
+  CRYPTO // BTC, ETH
+}
+
+enum AssetType {
+  STOCK
+  BOND
+  GOV_BOND
+  REIT
+  FUND
+  ETF
+  CASH
+  CRYPTO
+}
+
+enum CountryCode {
+  BR
+  US
+  AU
+}
+
+enum CurrencyCode {
+  BRL
+  USD
+  AUD
+}
+
+model Asset {
+  id        String       @id @default(uuid())
+  name      String
+  ticker    String?
+  class     AssetClass
+  type      AssetType?
+  country   CountryCode
+  currency  CurrencyCode
+  exchange  String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt()
+  Holdings  Holding[]
+
+  @@index([class])
+  @@index([type])
+  @@index([country])
+}
+
+model Holding {
+  id        String   @id @default(uuid())
+  quantity  Decimal
+  avgPrice  Decimal
+  walletId  String
+  Wallet    Wallet   @relation(fields: [walletId], references: [id])
+  assetId   String
+  Asset     Asset    @relation(fields: [assetId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+  @@unique([walletId, assetId])
+  @@unique([walletId])
+  @@unique([assetId])
 }

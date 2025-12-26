@@ -4,7 +4,7 @@
       <BaseSidebar />
     </div>
 
-    <div class="flex flex-col gap-5 w-full max-w-7xl mx-auto">
+    <div class="flex flex-col gap-4 w-full max-w-7xl mx-auto">
       <div class="h-24">
         <BaseTopbar />
       </div>

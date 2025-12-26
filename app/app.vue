@@ -3,5 +3,7 @@
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+
+    <Toast />
   </div>
 </template>
