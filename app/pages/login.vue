@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-[url(../assets/images/b3-sign.png)] bg-neutral-900 bg-cover bg-right bg-no-repeat flex w-screen h-screen"
+    class="bg-[url(/assets/images/b3-sign.png)] bg-neutral-900 bg-cover bg-right bg-no-repeat flex w-screen h-screen"
   >
     <div class="w-[50%] h-screen flex items-center justify-center">
       <div
