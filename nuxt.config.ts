@@ -56,4 +56,13 @@ export default defineNuxtConfig({
       callback: "/auth/callback",
     },
   },
+
+  vite: {
+    resolve: {
+      alias: {
+        ".prisma/client/index-browser":
+          "./node_modules/.prisma/client/index-browser.js",
+      },
+    },
+  },
 });
