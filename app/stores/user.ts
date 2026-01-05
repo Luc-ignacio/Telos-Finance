@@ -11,7 +11,8 @@ export const userStore = defineStore(
       avatar: string;
     }>();
 
-    const loading = ref<boolean>();
+    const loading = ref<boolean>(false);
+    const toast = useToast();
 
     const SignInWithGoogle = async () => {
       loading.value = true;
@@ -25,11 +26,20 @@ export const userStore = defineStore(
     const SignOut = async () => {
       loading.value = true;
 
-      await signOutUser();
+      try {
+        await signOutUser();
 
-      navigateTo({ name: "login" });
-
-      loading.value = false;
+        navigateTo({ name: "login" });
+      } catch (error) {
+        toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: error || "Failed to sign out",
+          life: 5000,
+        });
+      } finally {
+        loading.value = false;
+      }
     };
 
     onMounted(async () => {

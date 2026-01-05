@@ -27,10 +27,14 @@ export function useUsers() {
   };
 
   const signOutUser = async () => {
-    const response = await $fetch(`/api/v1/users/sign-out`, {
-      method: "GET",
-    });
-    return response;
+    try {
+      const response = await $fetch(`/api/v1/users/sign-out`, {
+        method: "GET",
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
   };
 
   return {
