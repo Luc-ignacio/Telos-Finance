@@ -41,9 +41,9 @@ const menus = [
     icon: "solar:chart-linear",
   },
   {
-    id: "Wallet",
-    name: "Wallet",
-    routeName: "wallet",
+    id: "Wallets",
+    name: "Wallets",
+    routeName: "wallets",
     icon: "solar:wallet-linear",
   },
 ];

@@ -31,6 +31,7 @@ export default defineNuxtConfig({
     "@prisma/nuxt",
     "@nuxtjs/supabase",
     "@pinia/nuxt",
+    "pinia-plugin-persistedstate/nuxt",
     "@nuxt/icon",
   ],
 

@@ -1,8 +1,7 @@
 import prisma from "../../lib/prisma";
-import { ResponseStatus } from "../types/api";
 
 export default class UserRepository {
-  async createUser(userData: {
+  async createUserAndWallet(userData: {
     id: string;
     name: string;
     email: string;
@@ -27,6 +26,13 @@ export default class UserRepository {
           name: userData.name,
           email: userData.email,
           avatar: userData.avatar,
+        },
+      });
+
+      const newWallet = await tx.wallet.create({
+        data: {
+          name: "My Wallet",
+          userId: newUser.id,
         },
       });
 

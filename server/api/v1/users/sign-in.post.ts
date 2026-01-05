@@ -1,7 +1,7 @@
 import { serverSupabaseClient } from "#supabase/server";
 import { ResponseStatus } from "../../../types/api";
 
-export default eventHandler(async (event) => {
+export default defineEventHandler(async (event) => {
   const supabase = await serverSupabaseClient(event);
 
   const { data, error } = await supabase.auth.signInWithOAuth({

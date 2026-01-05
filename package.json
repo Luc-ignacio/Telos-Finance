@@ -25,6 +25,7 @@
     "nuxt": "^4.2.2",
     "pg": "^8.16.3",
     "pinia": "^3.0.4",
+    "pinia-plugin-persistedstate": "^4.7.1",
     "primeicons": "^7.0.0",
     "primevue": "^4.5.3",
     "tsx": "^4.21.0",

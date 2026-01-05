@@ -6,7 +6,7 @@ export function useUsers() {
     return signInWithGoogle;
   };
 
-  const createUser = async (userData: {
+  const createUserAndWallet = async (userData: {
     id: string;
     name: string;
     email: string;
@@ -35,7 +35,7 @@ export function useUsers() {
 
   return {
     signInUser,
-    createUser,
+    createUserAndWallet,
     getUser,
     signOutUser,
   };

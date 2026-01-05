@@ -19,13 +19,14 @@ model User {
 }
 
 model Wallet {
-  id        String    @id @default(uuid())
-  name      String
-  userId    String
-  User      User      @relation(fields: [userId], references: [id])
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt()
-  Holdings  Holding[]
+  id           String        @id @default(uuid())
+  name         String
+  userId       String
+  User         User          @relation(fields: [userId], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt()
+  Holdings     Holding[]
+  Transactions Transaction[]
 }
 
 enum AssetClass {
@@ -50,47 +51,69 @@ enum AssetType {
 }
 
 enum CountryCode {
+  AU
   BR
   US
-  AU
 }
 
 enum CurrencyCode {
+  AUD
   BRL
   USD
-  AUD
-}
-
-model Asset {
-  id        String       @id @default(uuid())
-  name      String
-  ticker    String?
-  class     AssetClass
-  type      AssetType?
-  country   CountryCode
-  currency  CurrencyCode
-  exchange  String?
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt()
-  Holdings  Holding[]
-
-  @@index([class])
-  @@index([type])
-  @@index([country])
 }
 
 model Holding {
-  id        String   @id @default(uuid())
-  quantity  Decimal
-  avgPrice  Decimal
-  walletId  String
-  Wallet    Wallet   @relation(fields: [walletId], references: [id])
-  assetId   String
-  Asset     Asset    @relation(fields: [assetId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt()
+  id String @id @default(uuid())
 
-  @@unique([walletId, assetId])
-  @@unique([walletId])
-  @@unique([assetId])
+  // Wallet Info
+  walletId String
+  Wallet   Wallet @relation(fields: [walletId], references: [id])
+
+  // Asset Info
+  name     String
+  ticker   String?
+  class    AssetClass
+  type     AssetType?
+  country  CountryCode
+  currency CurrencyCode
+  exchange String?
+
+  // Financial Info
+  quantity Decimal @default(0)
+  avgPrice Decimal @default(0)
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt()
+  Transactions Transaction[]
+
+  @@unique([walletId, ticker])
+  @@unique([walletId, name])
+}
+
+enum TransactionType {
+  BUY
+  SELL
+  DIVIDEND
+  INTEREST
+}
+
+model Transaction {
+  id String @id @default(uuid())
+
+  // Wallet Info
+  walletId String
+  Wallet   Wallet @relation(fields: [walletId], references: [id])
+
+  // Holding Info
+  holdingId String
+  Holding   Holding @relation(fields: [holdingId], references: [id])
+
+  // Financial Info
+  type      TransactionType
+  quantity  Decimal
+  price     Decimal
+  currency  CurrencyCode
+  tradeDate DateTime
+
+  createdAt DateTime @default(now())
 }

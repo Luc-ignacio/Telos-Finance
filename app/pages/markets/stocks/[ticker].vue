@@ -48,11 +48,14 @@
           class: 'space-y-2',
         },
         title: {
-          class: 'flex items-center gap-4 text-gray-700 font-title',
+          class: 'text-lg flex items-center gap-4 text-gray-700 font-title',
         },
         subtitle: {
           class:
             'text-base text-justify flex flex-col gap-4 justify-between text-gray-700',
+        },
+        content: {
+          class: 'text-gray-700 mt-2',
         },
       }"
     >
@@ -76,7 +79,7 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <h2 class="text-2xl font-semibold">
+            <h2 class="text-xl font-semibold">
               R$
               {{ stockInfo?.regularMarketPrice?.toFixed(2).toLocaleString() }}
             </h2>
@@ -94,12 +97,12 @@
         </div>
       </template>
 
-      <template #subtitle>
+      <template #content>
         <div
           v-if="stockInfo?.summaryProfile"
           class="flex flex-col gap-2 w-full"
         >
-          <h2 class="text-xl font-semibold">About</h2>
+          <h2 class="text-lg font-semibold">About</h2>
           <p>{{ stockInfo?.summaryProfile?.longBusinessSummary }}</p>
 
           <NuxtLink :to="stockInfo?.summaryProfile?.website" target="_blank">
@@ -120,8 +123,6 @@
           </p>
         </div>
       </template>
-
-      <template #footer> </template>
     </Card>
   </div>
 </template>

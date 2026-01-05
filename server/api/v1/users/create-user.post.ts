@@ -1,14 +1,14 @@
 import { ResponseStatus } from "../../../types/api";
-import UsersRepository from "../../../repo/users";
+import UserRepository from "../../../repo/users";
 
-const userRepo = new UsersRepository();
+const userRepo = new UserRepository();
 
-export default eventHandler(async (event) => {
+export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
   const userData = body.userData;
 
-  const user = await userRepo.createUser(userData);
+  const user = await userRepo.createUserAndWallet(userData);
 
   if (!user) {
     throw createError({

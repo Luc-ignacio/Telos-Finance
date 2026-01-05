@@ -9,7 +9,7 @@ import { userStore } from "~/stores/user";
 const UserStore = userStore();
 const { currentUser } = storeToRefs(UserStore);
 
-const { createUser } = useUsers();
+const { createUserAndWallet } = useUsers();
 
 const user = useSupabaseUser();
 
@@ -24,7 +24,7 @@ watch(
         avatar: user.value.user_metadata.avatar_url,
       };
 
-      const response = await createUser(currentUser.value);
+      const response = await createUserAndWallet(currentUser.value);
 
       if (response) {
         return navigateTo("/");
@@ -33,24 +33,4 @@ watch(
   },
   { immediate: true }
 );
-
-// onMounted(async () => {
-//   await nextTick();
-
-//   const res = await getUser();
-//   user.value = res.data.user;
-
-//   if (user.value.user_metadata) {
-//     const userData = {
-//       name: user.value.user_metadata.full_name,
-//       email: user.value.user_metadata.email,
-//     };
-
-//     const response = await createUser(userData);
-
-//     if (response) {
-//       navigateTo("/");
-//     }
-//   }
-// });
 </script>
