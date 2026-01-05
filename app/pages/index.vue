@@ -1,6 +1,6 @@
 <template>
   <div class="flex w-full gap-5 p-5 rounded-2xl bg-white shadow-sm">
-    <h1>Page</h1>
+    <h1>Dashboard</h1>
   </div>
 </template>
 

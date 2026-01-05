@@ -6,30 +6,22 @@
         root: {
           class: 'rounded-2xl bg-white shadow-sm',
         },
-        caption: {
-          class: 'space-y-2',
-        },
         title: {
-          class: 'flex items-center gap-4 text-gray-700 ',
-        },
-        subtitle: {
           class:
-            'text-base text-justify flex flex-col gap-4 justify-between text-gray-700',
+            'text-lg font-title text-gray-700 flex items-center justify-between',
+        },
+        content: {
+          class: 'text-gray-700 mt-2',
         },
       }"
     >
       <template #title>
-        <Skeleton height="1.5rem" width="6rem" borderRadius="8px"></Skeleton>
+        <Skeleton height="1.5rem" width="8rem" borderRadius="8px"></Skeleton>
+        <Skeleton height="2.5rem" width="2.5rem" borderRadius="8px"></Skeleton>
       </template>
 
-      <template #subtitle>
-        <div class="flex flex-col gap-4 w-full">
-          <Skeleton height="1.5rem" width="10rem"></Skeleton>
-          <div class="flex items-start justify-between gap-4">
-            <Skeleton height="6rem" width="100%"></Skeleton>
-            <Skeleton height="2.5rem" width="2.5rem"></Skeleton>
-          </div>
-        </div>
+      <template #content>
+        <Skeleton height="8rem" width="full" borderRadius="8px"></Skeleton>
       </template>
     </Card>
 

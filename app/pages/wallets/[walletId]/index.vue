@@ -6,36 +6,28 @@
         root: {
           class: 'rounded-2xl bg-white shadow-sm',
         },
-        caption: {
-          class: 'space-y-2',
-        },
         title: {
-          class: 'flex items-center gap-4 text-gray-700 ',
-        },
-        subtitle: {
           class:
-            'text-base text-justify flex flex-col gap-4 justify-between text-gray-700',
+            'text-lg font-title text-gray-700 flex items-center justify-between',
+        },
+        content: {
+          class: 'text-gray-700 mt-2',
         },
       }"
     >
       <template #title>
-        <Skeleton height="4rem" width="4rem" borderRadius="16px"></Skeleton>
-
-        <div class="flex flex-col gap-2">
-          <Skeleton height="1.5rem" width="24rem" borderRadius="8px"></Skeleton>
-          <Skeleton height="1.5rem" width="18rem" borderRadius="8px"></Skeleton>
-        </div>
+        <Skeleton height="1.5rem" width="10rem" borderRadius="8px"></Skeleton>
+        <Skeleton height="2.5rem" width="10rem" borderRadius="16px"></Skeleton>
       </template>
 
-      <template #subtitle>
-        <div class="flex flex-col gap-4 w-full">
-          <Skeleton height="1.5rem" width="6rem"></Skeleton>
+      <template #content>
+        <div class="grid grid-cols-2 gap-4 w-full">
           <Skeleton height="8rem" width="full"></Skeleton>
-          <Skeleton height="2.5rem" width="8rem"></Skeleton>
+          <Skeleton height="8rem" width="full"></Skeleton>
+          <Skeleton height="8rem" width="full"></Skeleton>
+          <Skeleton height="8rem" width="full"></Skeleton>
         </div>
       </template>
-
-      <template #footer> </template>
     </Card>
 
     <Card
@@ -137,6 +129,7 @@
             </Card>
           </div>
         </div>
+        <span>{{ walletHoldingsList }}</span>
       </template>
     </Card>
 
@@ -308,6 +301,7 @@ const route = useRoute();
 const walletId = route.params.walletId?.toString();
 
 const wallet = ref<WalletWithHoldings>();
+const walletHoldingsList = ref<string[]>([]);
 const { getWalletById } = useWallets();
 const { addTransaction } = useTransactions();
 const { formatPrice, calculateTotalValue } = useUtils();
@@ -464,6 +458,8 @@ const init = async () => {
   if (walletId) {
     const res = await getWalletById(walletId);
     wallet.value = res;
+    walletHoldingsList.value =
+      res?.Holdings.map((holding) => holding.ticker) || [];
   }
   loading.value = false;
 };

@@ -6,15 +6,11 @@
         root: {
           class: 'rounded-2xl bg-white shadow-sm',
         },
-        caption: {
-          class: 'space-y-2',
-        },
         title: {
-          class: 'flex items-center gap-4 text-gray-700 ',
+          class: 'text-lg flex items-center gap-4 text-gray-700 font-title',
         },
-        subtitle: {
-          class:
-            'text-base text-justify flex flex-col gap-4 justify-between text-gray-700',
+        content: {
+          class: 'text-gray-700 mt-2',
         },
       }"
     >
@@ -27,15 +23,13 @@
         </div>
       </template>
 
-      <template #subtitle>
+      <template #content>
         <div class="flex flex-col gap-4 w-full">
           <Skeleton height="1.5rem" width="6rem"></Skeleton>
           <Skeleton height="8rem" width="full"></Skeleton>
           <Skeleton height="2.5rem" width="8rem"></Skeleton>
         </div>
       </template>
-
-      <template #footer> </template>
     </Card>
 
     <Card
@@ -44,15 +38,8 @@
         root: {
           class: 'rounded-2xl bg-white shadow-sm',
         },
-        caption: {
-          class: 'space-y-2',
-        },
         title: {
           class: 'text-lg flex items-center gap-4 text-gray-700 font-title',
-        },
-        subtitle: {
-          class:
-            'text-base text-justify flex flex-col gap-4 justify-between text-gray-700',
         },
         content: {
           class: 'text-gray-700 mt-2',
