@@ -9,7 +9,10 @@ export function useUtils() {
     }).format(Number(number));
   };
 
-  const formatPrice = (price: Decimal, currency: CurrencyCode) => {
+  const formatPrice = (
+    price: Decimal | number | null | undefined,
+    currency: CurrencyCode
+  ) => {
     const formattedPrice = Number(price).toLocaleString("pt-BR", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -25,29 +28,31 @@ export function useUtils() {
     }
   };
 
-  const calculateTotalValue = (
-    price: Decimal,
-    quantity: Decimal,
-    currency: CurrencyCode
-  ) => {
-    const value = (Number(price) * Number(quantity)).toLocaleString("pt-BR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+  const formatTotalReturn = (totalReturn: Decimal | number) => {
+    return Math.abs(Number(totalReturn));
+  };
 
-    switch (currency) {
-      case CurrencyCode.AUD:
-        return `A$ ${value}`;
-      case CurrencyCode.BRL:
-        return `R$ ${value}`;
-      case CurrencyCode.USD:
-        return `U$ ${value}`;
+  const getClass = (change: number) => {
+    if (change < 0) {
+      return "text-red-500";
+    } else {
+      return "text-green-500";
+    }
+  };
+
+  const getIcon = (change: number) => {
+    if (change < 0) {
+      return "pi pi-arrow-down-right";
+    } else {
+      return "pi pi-arrow-up-right";
     }
   };
 
   return {
     formatNumber,
     formatPrice,
-    calculateTotalValue,
+    formatTotalReturn,
+    getClass,
+    getIcon,
   };
 }

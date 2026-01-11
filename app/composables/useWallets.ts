@@ -13,8 +13,16 @@ export function useWallets() {
     return wallet;
   };
 
+  const getWalletQuotes = async (stocks: string[]) => {
+    const quotes = await $fetch(`/api/v1/wallets/get-quotes/${stocks}`, {
+      method: "GET",
+    });
+    return quotes;
+  };
+
   return {
     getWalletsByUserId,
     getWalletById,
+    getWalletQuotes,
   };
 }

@@ -56,7 +56,7 @@
       </template>
 
       <template #content>
-        <div v-if="!wallet?.Holdings.length" class="flex flex-col gap-2 w-full">
+        <div v-if="!wallet?.Holdings" class="flex flex-col gap-2 w-full">
           <h2 class="font-semibold">No holdings yet</h2>
           <p>
             This wallet doesn't contain any assets. Add your first investment to
@@ -83,19 +83,25 @@
                     'rounded-2xl bg-gray-100 shadow-sm hover:cursor-pointer hover:shadow-md transition-shadow',
                 },
                 title: {
-                  class:
-                    'font-title text-gray-700 flex items-center justify-between',
+                  class: 'font-title text-gray-700 flex items-center gap-4',
                 },
                 content: {
-                  class: 'text-base text-gray-700',
+                  class: 'text-base text-gray-700 mt-2',
                 },
               }"
             >
               <template #title>
-                <h1 class="text-base font-semibold">
-                  {{ holding.ticker }}
-                </h1>
-                <h2 class="text-sm uppercase">{{ holding.name }}</h2>
+                <img
+                  :src="holding?.quote?.logourl"
+                  :alt="holding?.quote?.longName || 'Company logo'"
+                  class="rounded-lg w-10"
+                />
+                <div class="flex flex-col">
+                  <h1 class="text-base font-semibold">
+                    {{ holding.ticker }}
+                  </h1>
+                  <h2 class="text-xs uppercase">{{ holding.name }}</h2>
+                </div>
               </template>
 
               <template #content>
@@ -107,29 +113,55 @@
                 </div>
 
                 <div class="flex items-center justify-between">
-                  <p>Average Price</p>
+                  <p>Avg Price</p>
                   <p class="font-semibold">
                     {{ formatPrice(holding.avgPrice, holding.currency) }}
                   </p>
                 </div>
 
                 <div class="flex items-center justify-between">
-                  <p>Value</p>
+                  <p>Mkt Price</p>
                   <p class="font-semibold">
                     {{
-                      calculateTotalValue(
-                        holding.avgPrice,
-                        holding.quantity,
+                      formatPrice(
+                        holding.quote?.regularMarketPrice,
                         holding.currency
                       )
                     }}
+                  </p>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <p>Mkt Value</p>
+                  <p class="font-semibold">
+                    {{ formatPrice(holding.mktValue, holding.currency) }}
+                  </p>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <p>Return</p>
+                  <p
+                    class="font-semibold"
+                    :class="
+                      holding.totalReturn >= 0
+                        ? 'text-green-500'
+                        : 'text-red-500'
+                    "
+                  >
+                    <i :class="getIcon(holding.totalReturnPercentage)" />
+                    {{
+                      formatPrice(
+                        formatTotalReturn(holding.totalReturn),
+                        holding.currency
+                      )
+                    }}
+                    ({{ holding.totalReturnPercentage.toFixed(2) }}%)
                   </p>
                 </div>
               </template>
             </Card>
           </div>
         </div>
-        <span>{{ walletHoldingsList }}</span>
       </template>
     </Card>
 
@@ -295,16 +327,16 @@ import type {
   CurrencyCode,
   TransactionType,
 } from "@prisma/client";
-import type { WalletWithHoldings } from "~/types";
+import type { FormattedWallet } from "~/types";
 
 const route = useRoute();
 const walletId = route.params.walletId?.toString();
 
-const wallet = ref<WalletWithHoldings>();
-const walletHoldingsList = ref<string[]>([]);
+const wallet = ref<FormattedWallet>();
+
 const { getWalletById } = useWallets();
 const { addTransaction } = useTransactions();
-const { formatPrice, calculateTotalValue } = useUtils();
+const { formatPrice, formatTotalReturn, getClass, getIcon } = useUtils();
 const toast = useToast();
 
 const loading = ref<boolean>(false);
@@ -458,8 +490,6 @@ const init = async () => {
   if (walletId) {
     const res = await getWalletById(walletId);
     wallet.value = res;
-    walletHoldingsList.value =
-      res?.Holdings.map((holding) => holding.ticker) || [];
   }
   loading.value = false;
 };
