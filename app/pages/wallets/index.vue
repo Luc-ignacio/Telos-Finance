@@ -8,7 +8,7 @@
         },
         title: {
           class:
-            'text-lg font-title text-gray-700 flex items-center justify-between',
+            'text-xl font-title text-gray-700 flex items-center justify-between',
         },
         content: {
           class: 'text-gray-700 mt-2',
@@ -33,7 +33,7 @@
           },
           title: {
             class:
-              'text-lg font-title text-gray-700 flex items-center justify-between',
+              'text-xl font-title text-gray-700 flex items-center justify-between',
           },
           content: {
             class: 'text-gray-700',
@@ -41,7 +41,7 @@
         }"
       >
         <template #title>
-          <h1 class="font-semibold">{{ wallet.name }}</h1>
+          <h1 class="font-bold">{{ wallet.name }}</h1>
           <Button
             icon="pi pi-eye"
             size="small"

@@ -2,7 +2,7 @@ import prisma from "../../lib/prisma";
 
 export default class WalletRepository {
   async getWalletsByUserId(userId: string) {
-    const wallets = prisma.wallet.findMany({
+    const wallets = await prisma.wallet.findMany({
       where: {
         userId: userId,
       },
@@ -15,7 +15,7 @@ export default class WalletRepository {
   }
 
   async getWalletById(walletId: string) {
-    const wallet = prisma.wallet.findUnique({
+    const wallet = await prisma.wallet.findUnique({
       where: {
         id: walletId,
       },

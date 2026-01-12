@@ -1,6 +1,6 @@
 export function useWallets() {
   const getWalletsByUserId = async (userId: string) => {
-    const wallets = await $fetch(`/api/v1/wallets/${userId}/get-all-wallets`, {
+    const wallets = await $fetch(`/api/v1/wallets/user/${userId}`, {
       method: "GET",
     });
     return wallets;

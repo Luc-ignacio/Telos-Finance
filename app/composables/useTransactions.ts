@@ -5,7 +5,6 @@ import type {
   CurrencyCode,
   TransactionType,
 } from "@prisma/client";
-import { ResponseStatus } from "~~/server/types/api";
 
 export function useTransactions() {
   const addTransaction = async (
@@ -36,7 +35,23 @@ export function useTransactions() {
     }
   };
 
+  const getTransactionsById = async (walletId: string, holdingId: string) => {
+    try {
+      const transactions = await $fetch(
+        `/api/v1/wallets/${walletId}/holdings/${holdingId}`,
+        {
+          method: "GET",
+        }
+      );
+
+      return transactions;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return {
     addTransaction,
+    getTransactionsById,
   };
 }

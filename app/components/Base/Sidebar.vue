@@ -1,11 +1,20 @@
 <template>
   <div class="flex flex-col gap-5 h-full rounded-2xl bg-white shadow-sm">
-    <div
-      class="h-24 p-5 flex items-center justify-center border-b border-gray-200"
-    >
-      <h1 class="font-title text-2xl font-semibold text-orange-500">
-        Telos Finance
-      </h1>
+    <div class="h-24 p-5 flex items-center border-b border-gray-200">
+      <div
+        class="flex w-full items-center justify-evenly hover:cursor-pointer"
+        @click="navigateTo({ name: 'index' })"
+      >
+        <img
+          src="assets/images/telos-finance-logo.png"
+          alt="Telos Finance Logo"
+          class="w-20"
+        />
+        <h1 class="font-title text-xl font-bold upper text-gray-800">
+          Telos <br />
+          Finance
+        </h1>
+      </div>
     </div>
 
     <div class="flex flex-col gap-1">

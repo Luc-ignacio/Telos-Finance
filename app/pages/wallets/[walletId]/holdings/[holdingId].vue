@@ -38,7 +38,7 @@
         },
         title: {
           class:
-            'text-lg font-title text-gray-700 flex items-center justify-between',
+            'text-xl font-title text-gray-700 flex items-center justify-between',
         },
         content: {
           class: 'text-gray-700 mt-2',
@@ -46,36 +46,21 @@
       }"
     >
       <template #title>
-        <h1 class="font-semibold">{{ wallet?.name }}</h1>
+        <h1 class="font-bold">{{ holding?.name }}</h1>
         <Button
           icon="pi pi-plus-circle"
           label="Add Transaction"
           size="small"
           @click="dialogVisible = true"
+          class="font-sans"
         />
       </template>
 
       <template #content>
-        <div v-if="!wallet?.Holdings" class="flex flex-col gap-2 w-full">
-          <h2 class="font-semibold">No holdings yet</h2>
-          <p>
-            This wallet doesn't contain any assets. Add your first investment to
-            start tracking performance, allocation, and progress towards your
-            goals.
-          </p>
-        </div>
+        {{ holdingTransactions }}
 
-        <div v-else class="grid grid-cols-2 gap-4 w-full">
-          <div
-            v-for="holding in wallet.Holdings"
-            :key="holding.id"
-            @click="
-              navigateTo({
-                name: 'wallets-walletId-holdings-holdingId',
-                params: { walletId: wallet.id, holdingId: holding.id },
-              })
-            "
-          >
+        <div class="grid lg:grid-cols-2 gap-4 w-full">
+          <div v-for="transaction in holdingTransactions" :key="transaction.id">
             <Card
               :pt="{
                 root: {
@@ -91,71 +76,44 @@
               }"
             >
               <template #title>
-                <img
-                  :src="holding?.quote?.logourl"
-                  :alt="holding?.quote?.longName || 'Company logo'"
-                  class="rounded-lg w-10"
-                />
                 <div class="flex flex-col">
-                  <h1 class="text-base font-semibold">
-                    {{ holding.ticker }}
+                  <h1 class="text-base font-bold">
+                    {{ transaction.id }}
                   </h1>
-                  <h2 class="text-xs uppercase">{{ holding.name }}</h2>
+                  <h2 class="text-xs uppercase">{{ transaction.id }}</h2>
                 </div>
               </template>
 
               <template #content>
                 <div class="flex items-center justify-between">
                   <p>Quantity</p>
-                  <p class="font-semibold">
-                    {{ Number(holding.quantity).toLocaleString("pt-BR") }}
+                  <p class="font-bold font-title">
+                    {{ transaction.id }}
                   </p>
                 </div>
 
                 <div class="flex items-center justify-between">
                   <p>Avg Price</p>
-                  <p class="font-semibold">
-                    {{ formatPrice(holding.avgPrice, holding.currency) }}
+                  <p class="font-bold font-title">
+                    {{ transaction.id }}
                   </p>
                 </div>
 
                 <div class="flex items-center justify-between">
                   <p>Mkt Price</p>
-                  <p class="font-semibold">
-                    {{
-                      formatPrice(
-                        holding.quote?.regularMarketPrice,
-                        holding.currency
-                      )
-                    }}
-                  </p>
+                  <p class="font-bold font-title">transaction.id</p>
                 </div>
 
                 <div class="flex items-center justify-between">
                   <p>Mkt Value</p>
-                  <p class="font-semibold">
-                    {{ formatPrice(holding.mktValue, holding.currency) }}
-                  </p>
+                  <p class="font-bold font-title">transaction.id</p>
                 </div>
 
                 <div class="flex items-center justify-between">
                   <p>Return</p>
-                  <p
-                    class="font-semibold"
-                    :class="
-                      holding.totalReturn >= 0
-                        ? 'text-green-500'
-                        : 'text-red-500'
-                    "
-                  >
-                    <i :class="getIcon(holding.totalReturnPercentage)" />
-                    {{
-                      formatPrice(
-                        formatTotalReturn(holding.totalReturn),
-                        holding.currency
-                      )
-                    }}
-                    ({{ holding.totalReturnPercentage.toFixed(2) }}%)
+                  <p class="font-bold font-title">
+                    <i :class="getIcon(transaction.id)" />
+                    transaction.id
                   </p>
                 </div>
               </template>
@@ -322,20 +280,18 @@
 </template>
 
 <script lang="ts" setup>
-import type {
-  CountryCode,
-  CurrencyCode,
-  TransactionType,
-} from "@prisma/client";
-import type { FormattedWallet } from "~/types";
+import type { Transaction, Holding } from "@prisma/client";
 
 const route = useRoute();
 const walletId = route.params.walletId?.toString();
+const holdingId = route.params.holdingId?.toString();
 
-const wallet = ref<FormattedWallet>();
+const holding = ref<Holding>();
+const holdingTransactions = ref<Transaction[]>([]);
 
 const { getWalletById } = useWallets();
-const { addTransaction } = useTransactions();
+const { addTransaction, getTransactionsById } = useTransactions();
+const { getHoldingById } = useHoldings();
 const { formatPrice, formatTotalReturn, getClass, getIcon } = useUtils();
 const toast = useToast();
 
@@ -487,10 +443,17 @@ const closeDialog = () => {
 
 const init = async () => {
   loading.value = true;
-  if (walletId) {
-    const res = await getWalletById(walletId);
-    wallet.value = res;
+
+  if (holdingId) {
+    const res = await getHoldingById(holdingId);
+    holding.value = res;
   }
+
+  if (walletId && holdingId) {
+    const res = await getTransactionsById(walletId, holdingId);
+    holdingTransactions.value = res;
+  }
+
   loading.value = false;
 };
 

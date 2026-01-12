@@ -5,7 +5,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
-        title: ["Raleway", "sans-serif"],
+        title: ["Merriweather", "serif"],
       },
     },
   },

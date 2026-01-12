@@ -1,4 +1,4 @@
-import brapi from "../../../../lib/brapi";
+import brapi from "../../../../../lib/brapi";
 
 export default defineEventHandler(async (event) => {
   const stocks = getRouterParam(event, "stocks");

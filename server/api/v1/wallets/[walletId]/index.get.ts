@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
 
   if (!wallet) {
     throw createError({
-      statusCode: ResponseStatus.INTERNAL_SERVER_ERROR,
+      statusCode: ResponseStatus.NOT_FOUND,
       statusMessage: "Failed to fetch wallet",
     });
   }
@@ -66,7 +66,7 @@ export default defineEventHandler(async (event) => {
 
         return {
           ...holding,
-          quote: quote,
+          quote: quote || null,
           mktValue: mktValue,
           totalReturn: totalReturn,
           totalReturnPercentage: totalReturnPercentage,

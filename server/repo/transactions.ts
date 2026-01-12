@@ -25,7 +25,7 @@ export default class TransactionRepository {
       transactionType: TransactionType;
     }
   ) {
-    return prisma.$transaction(async (tx) => {
+    return await prisma.$transaction(async (tx) => {
       const existingHolding = await tx.holding.findFirst({
         where: {
           OR: [
@@ -131,5 +131,19 @@ export default class TransactionRepository {
 
       return transaction;
     });
+  }
+
+  async getTransactionsById(walletId: string, holdingId: string) {
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        walletId: walletId,
+        holdingId: holdingId,
+      },
+      include: {
+        Holding: true,
+      },
+    });
+
+    return transactions;
   }
 }

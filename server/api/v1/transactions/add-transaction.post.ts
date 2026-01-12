@@ -1,6 +1,5 @@
 import { ResponseStatus } from "../../../types/api";
 import TransactionRepository from "../../../repo/transactions";
-import { handleError } from "vue";
 
 const transactionRepo = new TransactionRepository();
 

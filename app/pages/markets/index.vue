@@ -22,7 +22,7 @@
         >
           <template #header>
             <div class="flex justify-between items-center">
-              <h1 class="text-2xl font-title">Stocks</h1>
+              <h1 class="text-xl font-title font-bold text-gray-800">Stocks</h1>
 
               <IconField>
                 <InputIcon>
@@ -161,7 +161,7 @@
         >
           <template #header>
             <div class="flex justify-between items-center">
-              <h1 class="text-2xl font-title">Funds</h1>
+              <h1 class="text-xl font-title font-bold">Funds</h1>
               <IconField>
                 <InputIcon>
                   <i class="pi pi-search" style="font-size: small" />

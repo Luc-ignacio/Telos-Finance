@@ -1,11 +1,16 @@
 <template>
   <div
-    class="bg-[url(/assets/images/b3-sign.png)] bg-neutral-900 bg-cover bg-right bg-no-repeat flex w-screen h-screen"
+    class="bg-[url(assets/images/telos-finance-background.jpg)] bg-neutral-900 bg-cover bg-right bg-no-repeat flex w-screen h-screen"
   >
     <div class="w-[50%] h-screen flex items-center justify-center">
       <div
         class="bg-white/80 w-[30rem] rounded-2xl px-10 py-14 flex flex-col items-center justify-center gap-5"
       >
+        <img
+          src="assets/images/telos-finance-logo.png"
+          alt="Telos Finance Logo"
+          class="w-36"
+        />
         <h1 class="text-2xl text-center font-semibold">
           Welcome to Telos Finance
         </h1>

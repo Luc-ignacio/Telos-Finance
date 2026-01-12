@@ -33,6 +33,7 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "pinia-plugin-persistedstate/nuxt",
     "@nuxt/icon",
+    "@nuxt/fonts",
   ],
 
   primevue: {
@@ -45,6 +46,21 @@ export default defineNuxtConfig({
         },
       },
     },
+  },
+
+  fonts: {
+    families: [
+      {
+        name: "Inter",
+        provider: "google",
+        weights: [100, 200, 300, 400, 500, 600, 700],
+      },
+      {
+        name: "Merriweather",
+        provider: "google",
+        weights: [300, 400, 500, 600, 700],
+      },
+    ],
   },
 
   css: ["primeicons/primeicons.css"],
