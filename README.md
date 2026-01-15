@@ -8,7 +8,9 @@ It allows users to manage wallets, track assets, record transactions, and monito
 <img width="1512" height="860" alt="Telos-Finance-Stock" src="https://github.com/user-attachments/assets/4e2e0b94-6188-4cce-839e-20be2e169ea3" />
 <img width="1511" height="860" alt="Telos-Finance-Wallet" src="https://github.com/user-attachments/assets/65d264e3-b7aa-4ec0-a1fa-b2a213760bad" />
 
-## 🌍 **Live Website:** https://telos-finance.vercel.app/
+🚧 **Currently in active development**  
+
+## 🌍 **Live Preview:** https://telos-finance.vercel.app/
 
 ## 🚀 Features
 
