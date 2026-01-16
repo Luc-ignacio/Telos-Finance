@@ -7,7 +7,7 @@
           class: 'rounded-2xl bg-white shadow-sm',
         },
         title: {
-          class: 'text-lg flex items-center gap-4 text-gray-700 font-title',
+          class: 'text-lg flex items-center gap-4 text-gray-700 ',
         },
         content: {
           class: 'text-gray-700 mt-2',
@@ -39,7 +39,7 @@
           class: 'rounded-2xl bg-white shadow-sm',
         },
         title: {
-          class: 'text-xl flex items-center gap-4 text-gray-800 font-title',
+          class: 'text-xl flex items-center gap-4 text-gray-800 ',
         },
         content: {
           class: 'text-gray-700 mt-2',
@@ -89,7 +89,7 @@
           v-if="stockInfo?.summaryProfile"
           class="flex flex-col gap-2 w-full"
         >
-          <h2 class="text-lg font-title font-bold">About</h2>
+          <h2 class="text-lg font-bold">About</h2>
           <p>{{ stockInfo?.summaryProfile?.longBusinessSummary }}</p>
 
           <NuxtLink :to="stockInfo?.summaryProfile?.website" target="_blank">

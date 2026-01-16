@@ -7,8 +7,7 @@
           class: 'rounded-2xl bg-white shadow-sm',
         },
         title: {
-          class:
-            'text-xl font-title text-gray-700 flex items-center justify-between',
+          class: 'text-xl  text-gray-700 flex items-center justify-between',
         },
         content: {
           class: 'text-gray-700 mt-2',
@@ -32,8 +31,7 @@
             class: 'rounded-2xl bg-white shadow-sm',
           },
           title: {
-            class:
-              'text-xl font-title text-gray-700 flex items-center justify-between',
+            class: 'text-xl  text-gray-700 flex items-center justify-between',
           },
           content: {
             class: 'text-gray-700',

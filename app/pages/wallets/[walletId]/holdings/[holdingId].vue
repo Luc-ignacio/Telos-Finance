@@ -7,8 +7,7 @@
           class: 'rounded-2xl bg-white shadow-sm',
         },
         title: {
-          class:
-            'text-lg font-title text-gray-700 flex items-center justify-between',
+          class: 'text-lg  text-gray-700 flex items-center justify-between',
         },
         content: {
           class: 'text-gray-700 mt-2',
@@ -37,11 +36,10 @@
           class: 'rounded-2xl bg-white shadow-sm',
         },
         title: {
-          class:
-            'text-xl font-title text-gray-700 flex items-center justify-between',
+          class: 'text-xl  text-gray-700 flex items-center justify-between',
         },
         content: {
-          class: 'text-gray-700 mt-2',
+          class: 'text-gray-700 flex gap-4 overflow-y-auto mt-2',
         },
       }"
     >
@@ -57,64 +55,74 @@
       </template>
 
       <template #content>
-        {{ holdingTransactions }}
+        <div class="w-[50%]">
+          <Chart
+            type="line"
+            :data="chartData"
+            :options="chartOptions"
+            class="h-full"
+          />
+        </div>
 
-        <div class="grid lg:grid-cols-2 gap-4 w-full">
+        <div
+          class="w-[50%] p-4 border border-gray-200 rounded-2xl flex flex-col gap-4"
+        >
+          <h2 class="font-bold">Transactions</h2>
           <div v-for="transaction in holdingTransactions" :key="transaction.id">
             <Card
               :pt="{
                 root: {
                   class:
-                    'rounded-2xl bg-gray-100 shadow-sm hover:cursor-pointer hover:shadow-md transition-shadow',
-                },
-                title: {
-                  class: 'font-title text-gray-700 flex items-center gap-4',
+                    'rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-md',
                 },
                 content: {
-                  class: 'text-base text-gray-700 mt-2',
+                  class:
+                    'text-base text-gray-700 flex items-center justify-between',
                 },
               }"
             >
-              <template #title>
-                <div class="flex flex-col">
-                  <h1 class="text-base font-bold">
-                    {{ transaction.id }}
-                  </h1>
-                  <h2 class="text-xs uppercase">{{ transaction.id }}</h2>
-                </div>
-              </template>
-
               <template #content>
-                <div class="flex items-center justify-between">
-                  <p>Quantity</p>
-                  <p class="font-bold font-title">
-                    {{ transaction.id }}
-                  </p>
+                <div class="flex flex-col gap-1">
+                  <div class="flex gap-1 items-center">
+                    <p class="font-bold text-sm">
+                      {{ transaction.Holding.ticker }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      – {{ transaction.Holding.name }}
+                    </p>
+                  </div>
+                  <div
+                    class="text-xs font-sans font-semibold flex gap-1 items-center"
+                  >
+                    <div
+                      class="flex items-center rounded-full"
+                      :class="getTransactionClass(transaction.type)"
+                    >
+                      <Icon
+                        :name="getTransactionTypeIcon(transaction.type)"
+                        size="20"
+                      />
+                    </div>
+                    {{ getTransactionTypeLabel(transaction.type) }}
+                  </div>
+                  <span class="font-normal text-xs text-gray-500">{{
+                    formatDate(transaction.tradeDate)
+                  }}</span>
                 </div>
 
-                <div class="flex items-center justify-between">
-                  <p>Avg Price</p>
-                  <p class="font-bold font-title">
-                    {{ transaction.id }}
-                  </p>
-                </div>
-
-                <div class="flex items-center justify-between">
-                  <p>Mkt Price</p>
-                  <p class="font-bold font-title">transaction.id</p>
-                </div>
-
-                <div class="flex items-center justify-between">
-                  <p>Mkt Value</p>
-                  <p class="font-bold font-title">transaction.id</p>
-                </div>
-
-                <div class="flex items-center justify-between">
-                  <p>Return</p>
-                  <p class="font-bold font-title">
-                    <i :class="getIcon(transaction.id)" />
-                    transaction.id
-                  </p>
+                <div class="flex flex-col gap-1">
+                  <div class="text-sm font-bold">
+                    {{
+                      formatPrice(
+                        Number(transaction.price * transaction.quantity),
+                        transaction.currency
+                      )
+                    }}
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    {{ transaction.quantity }} x
+                    {{ formatPrice(transaction.price, transaction.currency) }}
+                  </div>
                 </div>
               </template>
             </Card>
@@ -292,7 +300,13 @@ const holdingTransactions = ref<Transaction[]>([]);
 const { getWalletById } = useWallets();
 const { addTransaction, getTransactionsById } = useTransactions();
 const { getHoldingById } = useHoldings();
-const { formatPrice, formatTotalReturn, getClass, getIcon } = useUtils();
+const {
+  formatDate,
+  formatPrice,
+  getTransactionClass,
+  getTransactionTypeIcon,
+  getTransactionTypeLabel,
+} = useUtils();
 const toast = useToast();
 
 const loading = ref<boolean>(false);
@@ -520,7 +534,69 @@ const saveAsset = async () => {
   }
 };
 
+const chartData = ref();
+const chartOptions = ref();
+
+const setChartData = () => {
+  const documentStyle = getComputedStyle(document.documentElement);
+
+  return {
+    labels: ["January", "February", "March", "April", "May", "June", "July"],
+    datasets: [
+      {
+        label: "First Dataset",
+        data: [65, 59, 80, 81, 56, 55, 40],
+        fill: false,
+        borderColor: documentStyle.getPropertyValue("--p-lime-500"),
+        tension: 0.4,
+      },
+    ],
+  };
+};
+const setChartOptions = () => {
+  const documentStyle = getComputedStyle(document.documentElement);
+  const textColor = documentStyle.getPropertyValue("--p-text-color");
+  const textColorSecondary = documentStyle.getPropertyValue(
+    "--p-text-muted-color"
+  );
+  const surfaceBorder = documentStyle.getPropertyValue(
+    "--p-content-border-color"
+  );
+
+  return {
+    maintainAspectRatio: false,
+    aspectRatio: 0.6,
+    plugins: {
+      legend: {
+        labels: {
+          color: textColor,
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: textColorSecondary,
+        },
+        grid: {
+          color: surfaceBorder,
+        },
+      },
+      y: {
+        ticks: {
+          color: textColorSecondary,
+        },
+        grid: {
+          color: surfaceBorder,
+        },
+      },
+    },
+  };
+};
+
 onMounted(async () => {
   await init();
+  chartData.value = setChartData();
+  chartOptions.value = setChartOptions();
 });
 </script>

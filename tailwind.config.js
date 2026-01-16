@@ -4,8 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        title: ["Merriweather", "serif"],
+        sans: ["Merriweather", "serif"],
       },
     },
   },

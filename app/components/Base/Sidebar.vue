@@ -10,7 +10,7 @@
           alt="Telos Finance Logo"
           class="w-20"
         />
-        <h1 class="font-title text-xl font-bold upper text-gray-800">
+        <h1 class="text-xl font-bold upper text-gray-800">
           Telos <br />
           Finance
         </h1>

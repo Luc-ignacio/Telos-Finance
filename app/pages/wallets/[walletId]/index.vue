@@ -7,8 +7,7 @@
           class: 'rounded-2xl bg-white shadow-sm',
         },
         title: {
-          class:
-            'text-lg font-title text-gray-700 flex items-center justify-between',
+          class: 'text-lg  text-gray-700 flex items-center justify-between',
         },
         content: {
           class: 'text-gray-700 mt-2',
@@ -37,8 +36,7 @@
           class: 'rounded-2xl bg-white shadow-sm',
         },
         title: {
-          class:
-            'text-lg font-title text-gray-700 flex items-center justify-between',
+          class: 'text-lg  text-gray-700 flex items-center justify-between',
         },
         content: {
           class: 'text-gray-700 mt-2',
@@ -83,7 +81,7 @@
                     'rounded-2xl bg-gray-100 shadow-sm hover:cursor-pointer hover:shadow-md transition-shadow',
                 },
                 title: {
-                  class: 'font-title text-gray-700 flex items-center gap-4',
+                  class: ' text-gray-700 flex items-center gap-4',
                 },
                 content: {
                   class: 'text-base text-gray-700 mt-2',
@@ -144,8 +142,8 @@
                     class="font-semibold"
                     :class="
                       holding.totalReturn >= 0
-                        ? 'text-green-500'
-                        : 'text-red-500'
+                        ? 'text-green-600'
+                        : 'text-red-600'
                     "
                   >
                     <i :class="getIcon(holding.totalReturnPercentage)" />
