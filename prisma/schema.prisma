@@ -106,7 +106,7 @@ model Transaction {
 
   // Holding Info
   holdingId String
-  Holding   Holding @relation(fields: [holdingId], references: [id])
+  Holding   Holding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
 
   // Financial Info
   type      TransactionType

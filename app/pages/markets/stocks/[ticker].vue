@@ -117,6 +117,10 @@
 <script lang="ts" setup>
 import type { QuoteRetrieveResponse } from "brapi/resources/quote.mjs";
 
+definePageMeta({
+  breadcrumbMenu: [{ label: "Markets", route: "/markets" }, { label: "Stock" }],
+});
+
 const route = useRoute();
 const ticker = route.params.ticker?.toString();
 

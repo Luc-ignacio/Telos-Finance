@@ -43,10 +43,14 @@ export default defineEventHandler(async (event) => {
 
   let formattedHoldings: ((typeof wallet.Holdings)[number] & {
     quote: QuoteRetrieveResponse.Result | null;
+    paidValue: number;
     mktValue: number;
     totalReturn: number;
     totalReturnPercentage: number;
   })[] = [];
+
+  let totalInvested = 0;
+  let totalValue = 0;
 
   if (quotesList.length > 0) {
     formattedHoldings = wallet.Holdings.map((holding) => {
@@ -64,9 +68,13 @@ export default defineEventHandler(async (event) => {
 
         const totalReturnPercentage = (totalReturn * 100) / paidValue;
 
+        totalInvested = totalInvested + paidValue;
+        totalValue = totalValue + mktValue;
+
         return {
           ...holding,
           quote: quote || null,
+          paidValue: paidValue,
           mktValue: mktValue,
           totalReturn: totalReturn,
           totalReturnPercentage: totalReturnPercentage,
@@ -75,8 +83,15 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  const totalReturn = totalValue - totalInvested;
+  const totalReturnPercentage = (totalReturn * 100) / totalInvested;
+
   return {
     ...wallet,
+    totalInvested: totalInvested,
+    totalValue: totalValue,
+    totalReturn: totalReturn,
+    totalReturnPercentage: totalReturnPercentage,
     Holdings: formattedHoldings,
   };
 });

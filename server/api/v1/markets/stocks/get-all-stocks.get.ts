@@ -9,6 +9,8 @@ export default defineEventHandler(async (event) => {
   const fundsList = response.stocks?.filter((item) => item.type === "fund");
   const bdrsList = response.stocks?.filter((item) => item.type === "bdr");
 
+  stocksList?.sort((a, b) => b?.market_cap - a?.market_cap);
+
   return {
     stocksList,
     fundsList,

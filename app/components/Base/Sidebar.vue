@@ -22,7 +22,9 @@
         <NuxtLink
           :to="{ name: item.routeName }"
           :class="
-            route.name === item.routeName ? 'bg-orange-100 text-orange-500' : ''
+            isActiveMenu(route.name, item.routeName)
+              ? 'bg-orange-100 text-orange-500'
+              : ''
           "
           class="flex items-center gap-4 px-5 py-3 mr-10 rounded-r-2xl transition-all hover:bg-gray-200 hover:text-black hover:cursor-pointer duration-300"
         >
@@ -35,6 +37,8 @@
 </template>
 
 <script lang="ts" setup>
+import type { RouteRecordNameGeneric } from "vue-router";
+
 const route = useRoute();
 const menus = [
   {
@@ -56,4 +60,13 @@ const menus = [
     icon: "solar:wallet-linear",
   },
 ];
+
+const isActiveMenu = (route: RouteRecordNameGeneric, itemRoute: string) => {
+  let isActive = false;
+  if (route?.toString().startsWith(itemRoute)) {
+    return (isActive = true);
+  }
+
+  return isActive;
+};
 </script>

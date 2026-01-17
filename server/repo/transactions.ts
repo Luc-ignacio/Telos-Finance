@@ -142,6 +142,9 @@ export default class TransactionRepository {
       include: {
         Holding: true,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
     return transactions;
