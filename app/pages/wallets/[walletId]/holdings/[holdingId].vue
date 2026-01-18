@@ -33,7 +33,7 @@
       v-else
       :pt="{
         root: {
-          class: 'rounded-2xl bg-white shadow-sm',
+          class: 'rounded-2xl bg-white shadow-sm min-h-[50dvh]',
         },
         title: {
           class: 'text-xl  text-gray-700 flex items-center justify-between',
@@ -49,13 +49,88 @@
       </template>
 
       <template #content>
-        <div class="w-[50%]">
-          <Chart
-            type="line"
-            :data="chartData"
-            :options="chartOptions"
-            class="h-full"
-          />
+        <div class="w-[50%] flex flex-col gap-4">
+          <Card
+            v-if="holding"
+            :pt="{
+              root: {
+                class:
+                  'rounded-2xl bg-gray-100 shadow-sm hover:cursor-pointer hover:shadow-md transition-shadow',
+              },
+              title: {
+                class: ' text-gray-700 flex items-center gap-4',
+              },
+              content: {
+                class: 'text-base text-gray-700 mt-2',
+              },
+            }"
+          >
+            <template #title>
+              <img
+                :src="holding.quote?.logourl"
+                :alt="holding.quote?.longName || 'Company logo'"
+                class="rounded-lg w-10"
+              />
+              <div class="flex flex-col">
+                <h1 class="text-base font-semibold">
+                  {{ holding.ticker }}
+                </h1>
+                <h2 class="text-xs uppercase">{{ holding.name }}</h2>
+              </div>
+            </template>
+
+            <template #content>
+              <div class="flex items-center justify-between">
+                <p>Quantity</p>
+                <p class="font-semibold">
+                  {{ Number(holding.quantity).toLocaleString("pt-BR") }}
+                </p>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <p>Avg Price</p>
+                <p class="font-semibold">
+                  {{ formatPrice(holding.avgPrice, holding.currency) }}
+                </p>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <p>Mkt Price</p>
+                <p class="font-semibold">
+                  {{
+                    formatPrice(
+                      holding.quote?.regularMarketPrice,
+                      holding.currency,
+                    )
+                  }}
+                </p>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <p>Mkt Value</p>
+                <p class="font-semibold">
+                  {{ formatPrice(holding.mktValue, holding.currency) }}
+                </p>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <p>Return</p>
+                <p class="font-semibold" :class="getClass(holding.totalReturn)">
+                  <i :class="getIcon(holding.totalReturn)" />
+                  {{
+                    formatPrice(
+                      formatTotalReturn(holding.totalReturn),
+                      holding.currency,
+                    )
+                  }}
+                  ({{
+                    formatTotalReturn(holding.totalReturnPercentage).toFixed(2)
+                  }}%)
+                </p>
+              </div>
+            </template>
+          </Card>
+          <Chart type="line" :data="chartData" :options="chartOptions" />
         </div>
 
         <div
@@ -88,10 +163,11 @@
 
                     <div class="flex gap-1">
                       <Button
-                        icon="pi pi-pencil"
+                        icon="pi pi-ellipsis-v"
                         size="small"
                         severity="secondary"
                         text
+                        @click="togglePopover($event)"
                       />
                     </div>
                   </div>
@@ -123,7 +199,7 @@
                         {{
                           formatPrice(
                             Number(transaction.price * transaction.quantity),
-                            transaction.currency
+                            transaction.currency,
                           )
                         }}
                       </div>
@@ -142,11 +218,30 @@
         </div>
       </template>
     </Card>
+
+    <Popover ref="popoverRef">
+      <div class="flex flex-col gap-4">
+        <Button
+          icon="pi pi-pencil"
+          size="small"
+          label="Edit"
+          severity="secondary"
+          text
+        />
+        <Button
+          icon="pi pi-trash"
+          size="small"
+          label="Delete"
+          severity="danger"
+          text
+        />
+      </div>
+    </Popover>
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { Transaction, Holding } from "@prisma/client";
+import type { FormattedHolding, TransactionWithHoldings } from "~/types";
 
 definePageMeta({
   breadcrumbMenu: [
@@ -160,8 +255,8 @@ const route = useRoute();
 const walletId = route.params.walletId?.toString();
 const holdingId = route.params.holdingId?.toString();
 
-const holding = ref<Holding>();
-const holdingTransactions = ref<Transaction[]>([]);
+const holding = ref<FormattedHolding>();
+const holdingTransactions = ref<TransactionWithHoldings[]>([]);
 
 const { getTransactionsById } = useTransactions();
 const { getHoldingById } = useHoldings();
@@ -171,6 +266,9 @@ const {
   getTransactionClass,
   getTransactionTypeIcon,
   getTransactionTypeLabel,
+  formatTotalReturn,
+  getClass,
+  getIcon,
 } = useUtils();
 
 const loading = ref<boolean>(false);
@@ -189,6 +287,12 @@ const init = async () => {
   }
 
   loading.value = false;
+};
+
+const popoverRef = ref();
+
+const togglePopover = (event) => {
+  popoverRef.value.toggle(event);
 };
 
 const chartData = ref();
@@ -214,10 +318,10 @@ const setChartOptions = () => {
   const documentStyle = getComputedStyle(document.documentElement);
   const textColor = documentStyle.getPropertyValue("--p-text-color");
   const textColorSecondary = documentStyle.getPropertyValue(
-    "--p-text-muted-color"
+    "--p-text-muted-color",
   );
   const surfaceBorder = documentStyle.getPropertyValue(
-    "--p-content-border-color"
+    "--p-content-border-color",
   );
 
   return {

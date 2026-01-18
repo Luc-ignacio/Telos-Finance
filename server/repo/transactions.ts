@@ -3,12 +3,71 @@ import {
   AssetType,
   CountryCode,
   CurrencyCode,
+  Transaction,
   TransactionType,
 } from "@prisma/client";
 import prisma from "../../lib/prisma";
 import { ResponseStatus } from "../types/api";
 
+async function recalculateHoldingInfo(tx, walletId: string, holdingId: string) {
+  const transactions = await tx.transa;
+}
+
 export default class TransactionRepository {
+  async recalculateAndUpdateHoldingInfo(
+    tx,
+    walletId: string,
+    holdingId: string,
+  ) {
+    const transactions = await tx.transaction.findMany({
+      where: {
+        walletId: walletId,
+        holdingId: holdingId,
+      },
+      include: {
+        Holding: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    let quantity = 0;
+    let avgPrice = 0;
+
+    for (const transaction of transactions) {
+      if (transaction.type === "BUY") {
+        const totalCost =
+          avgPrice * quantity +
+          Number(transaction.price) * Number(transaction.quantity);
+
+        quantity += Number(transaction.quantity);
+        avgPrice = quantity > 0 ? totalCost / quantity : 0;
+      }
+
+      if (transaction.type === "SELL") {
+        quantity -= Number(transaction.quantity);
+      }
+    }
+
+    const updatedHolding = await tx.holding.update({
+      where: {
+        id: holdingId,
+      },
+      data: {
+        quantity: quantity,
+        avgPrice: avgPrice,
+      },
+    });
+
+    if (!updatedHolding) {
+      throw {
+        statusCode: ResponseStatus.INTERNAL_SERVER_ERROR,
+        statusMessage: "Failed to recalculate and update holding",
+      };
+    }
+  }
+
   async addTransaction(
     walletId: string,
     assetData: {
@@ -23,7 +82,7 @@ export default class TransactionRepository {
       price: number;
       quantity: number;
       transactionType: TransactionType;
-    }
+    },
   ) {
     return await prisma.$transaction(async (tx) => {
       const existingHolding = await tx.holding.findFirst({
@@ -41,7 +100,7 @@ export default class TransactionRepository {
         },
       });
 
-      if (existingHolding === null) {
+      if (!existingHolding) {
         const holding = await tx.holding.create({
           data: {
             walletId: walletId,
@@ -84,43 +143,11 @@ export default class TransactionRepository {
         },
       });
 
-      if (assetData.transactionType === TransactionType.BUY) {
-        const newQuantity =
-          Number(existingHolding.quantity) + assetData.quantity;
-
-        const newAvgPrice =
-          (Number(existingHolding.avgPrice) * Number(existingHolding.quantity) +
-            assetData.price * assetData.quantity) /
-          newQuantity;
-
-        const updatedHolding = await tx.holding.update({
-          where: {
-            id: existingHolding.id,
-          },
-          data: {
-            avgPrice: newAvgPrice,
-            quantity: newQuantity,
-          },
-        });
-
-        return updatedHolding;
-      }
-
-      if (assetData.transactionType === TransactionType.SELL) {
-        const newQuantity =
-          Number(existingHolding.quantity) - assetData.quantity;
-
-        const updatedHolding = await tx.holding.update({
-          where: {
-            id: existingHolding.id,
-          },
-          data: {
-            quantity: newQuantity,
-          },
-        });
-
-        return updatedHolding;
-      }
+      await this.recalculateAndUpdateHoldingInfo(
+        tx,
+        walletId,
+        existingHolding.id,
+      );
 
       if (!transaction) {
         throw {

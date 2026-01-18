@@ -7,24 +7,43 @@
           class: 'rounded-2xl bg-white shadow-sm',
         },
         title: {
-          class: 'text-lg  text-gray-700 flex items-center justify-between',
+          class: 'text-lg text-gray-700',
         },
         content: {
-          class: 'text-gray-700 mt-2',
+          class: 'text-gray-700',
         },
       }"
     >
       <template #title>
-        <Skeleton height="1.5rem" width="10rem" borderRadius="8px"></Skeleton>
-        <Skeleton height="2.5rem" width="10rem" borderRadius="16px"></Skeleton>
+        <div class="flex items-center justify-between">
+          <Skeleton height="2rem" width="8rem" borderRadius="8px"></Skeleton>
+
+          <div class="flex items-center gap-8">
+            <Skeleton height="3rem" width="8rem" borderRadius="8px"></Skeleton>
+            <Skeleton height="3rem" width="8rem" borderRadius="8px"></Skeleton>
+            <Skeleton height="3rem" width="11rem" borderRadius="8px"></Skeleton>
+          </div>
+        </div>
+        <Divider />
       </template>
 
       <template #content>
-        <div class="grid grid-cols-2 gap-4 w-full">
-          <Skeleton height="13rem" width="full"></Skeleton>
-          <Skeleton height="13rem" width="full"></Skeleton>
-          <Skeleton height="13rem" width="full"></Skeleton>
-          <Skeleton height="13rem" width="full"></Skeleton>
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <Skeleton height="2rem" width="8rem" borderRadius="8px"></Skeleton>
+
+            <Skeleton
+              height="2.5rem"
+              width="10rem"
+              borderRadius="8px"
+            ></Skeleton>
+          </div>
+          <div class="grid grid-cols-2 gap-4 w-full">
+            <Skeleton height="13rem" width="full"></Skeleton>
+            <Skeleton height="13rem" width="full"></Skeleton>
+            <Skeleton height="13rem" width="full"></Skeleton>
+            <Skeleton height="13rem" width="full"></Skeleton>
+          </div>
         </div>
       </template>
     </Card>
@@ -66,7 +85,7 @@
                 {{
                   formatPrice(
                     wallet?.totalInvested,
-                    wallet?.Holdings[0]?.currency
+                    wallet?.Holdings[0]?.currency,
                   )
                 }}
               </p>
@@ -81,7 +100,7 @@
                 {{
                   formatPrice(
                     formatTotalReturn(wallet?.totalReturn),
-                    wallet?.Holdings[0]?.currency
+                    wallet?.Holdings[0]?.currency,
                   )
                 }}
                 ({{
@@ -173,7 +192,7 @@
                     {{
                       formatPrice(
                         holding.quote?.regularMarketPrice,
-                        holding.currency
+                        holding.currency,
                       )
                     }}
                   </p>
@@ -196,18 +215,16 @@
                     {{
                       formatPrice(
                         formatTotalReturn(holding.totalReturn),
-                        holding.currency
+                        holding.currency,
                       )
                     }}
                     ({{
                       formatTotalReturn(holding.totalReturnPercentage).toFixed(
-                        2
+                        2,
                       )
                     }}%)
                   </p>
                 </div>
-
-                {{ formatPrice(holding.paidValue, holding.currency) }}
               </template>
             </Card>
           </div>

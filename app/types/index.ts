@@ -5,6 +5,10 @@ export type WalletWithHoldings = Prisma.WalletGetPayload<{
   include: { Holdings: true };
 }>;
 
+export type TransactionWithHoldings = Prisma.TransactionGetPayload<{
+  include: { Holding: true };
+}>;
+
 export type FormattedWallet = Wallet & {
   totalInvested: number;
   totalValue: number;
@@ -17,4 +21,12 @@ export type FormattedWallet = Wallet & {
     totalReturn: number;
     totalReturnPercentage: number;
   })[];
+};
+
+export type FormattedHolding = Holding & {
+  quote: QuoteRetrieveResponse.Result | null;
+  paidValue: number;
+  mktValue: number;
+  totalReturn: number;
+  totalReturnPercentage: number;
 };

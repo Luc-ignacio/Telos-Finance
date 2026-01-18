@@ -2,6 +2,7 @@ import { ResponseStatus } from "../../../../types/api";
 import WalletRepository from "../../../../repo/wallets";
 import brapi from "../../../../lib/brapi";
 import type { QuoteRetrieveResponse } from "brapi/resources/quote.mjs";
+import type { FormattedHolding } from "~/types";
 
 const walletRepo = new WalletRepository();
 
@@ -41,13 +42,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  let formattedHoldings: ((typeof wallet.Holdings)[number] & {
-    quote: QuoteRetrieveResponse.Result | null;
-    paidValue: number;
-    mktValue: number;
-    totalReturn: number;
-    totalReturnPercentage: number;
-  })[] = [];
+  let formattedHoldings: FormattedHolding[] = [];
 
   let totalInvested = 0;
   let totalValue = 0;
@@ -55,7 +50,7 @@ export default defineEventHandler(async (event) => {
   if (quotesList.length > 0) {
     formattedHoldings = wallet.Holdings.map((holding) => {
       const quote: QuoteRetrieveResponse.Result | undefined = quotesList.find(
-        (item) => item.symbol === holding.ticker
+        (item) => item.symbol === holding.ticker,
       );
 
       if (quote) {
