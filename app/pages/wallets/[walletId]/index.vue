@@ -133,24 +133,14 @@
             <TransactionAdd :walletId="walletId" @refresh="init()" />
           </span>
 
-          <div
-            v-for="holding in wallet.Holdings"
-            :key="holding.id"
-            @click="
-              navigateTo({
-                name: 'wallets-walletId-holdings-holdingId',
-                params: { walletId: wallet.id, holdingId: holding.id },
-              })
-            "
-          >
+          <div v-for="holding in wallet.Holdings" :key="holding.id">
             <Card
               :pt="{
                 root: {
-                  class:
-                    'rounded-2xl bg-gray-100 shadow-sm hover:cursor-pointer hover:shadow-md transition-shadow',
+                  class: 'rounded-2xl bg-gray-100 shadow-sm',
                 },
                 title: {
-                  class: ' text-gray-700 flex items-center gap-4',
+                  class: ' text-gray-700',
                 },
                 content: {
                   class: 'text-base text-gray-700 mt-2',
@@ -158,16 +148,27 @@
               }"
             >
               <template #title>
-                <img
-                  :src="holding?.quote?.logourl"
-                  :alt="holding?.quote?.longName || 'Company logo'"
-                  class="rounded-lg w-10"
-                />
-                <div class="flex flex-col">
-                  <h1 class="text-base font-semibold">
-                    {{ holding.ticker }}
-                  </h1>
-                  <h2 class="text-xs uppercase">{{ holding.name }}</h2>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <img
+                      :src="holding?.quote?.logourl"
+                      :alt="holding?.quote?.longName || 'Company logo'"
+                      class="rounded-lg w-10"
+                    />
+                    <div class="flex flex-col">
+                      <h1 class="text-base font-semibold">
+                        {{ holding.ticker }}
+                      </h1>
+                      <h2 class="text-xs uppercase">{{ holding.name }}</h2>
+                    </div>
+                  </div>
+
+                  <Button
+                    icon="pi pi-ellipsis-v"
+                    severity="secondary"
+                    text
+                    @click="togglePopover($event, holding)"
+                  />
                 </div>
               </template>
 
@@ -231,11 +232,50 @@
         </div>
       </template>
     </Card>
+
+    <Popover ref="popoverRef" @show="selectedHolding = popoverRef.holding">
+      <div class="flex flex-col gap-4">
+        <Button
+          icon="pi pi-eye"
+          size="small"
+          label="View"
+          severity="secondary"
+          text
+          fluid
+          @click="
+            navigateTo({
+              name: 'wallets-walletId-holdings-holdingId',
+              params: {
+                walletId: wallet?.id,
+                holdingId: popoverRef.holding.id,
+              },
+            })
+          "
+        />
+
+        <Button
+          icon="pi pi-trash"
+          label="Delete"
+          size="small"
+          severity="danger"
+          text
+          fluid
+          @click="holdingDeleteRef.dialogVisible = true"
+        />
+      </div>
+    </Popover>
+
+    <HoldingDelete
+      ref="holdingDeleteRef"
+      v-model:holding="selectedHolding"
+      :showButton="false"
+      @refresh="init()"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { FormattedWallet } from "~/types";
+import type { FormattedHolding, FormattedWallet } from "~/types";
 
 definePageMeta({
   breadcrumbMenu: [
@@ -262,6 +302,16 @@ const init = async () => {
   }
   loading.value = false;
 };
+
+const popoverRef = ref();
+const selectedHolding = ref<FormattedHolding>();
+
+const togglePopover = (event: Event, holding: FormattedHolding) => {
+  popoverRef.value.toggle(event);
+  popoverRef.value.holding = holding;
+};
+
+const holdingDeleteRef = ref();
 
 onMounted(async () => {
   await init();

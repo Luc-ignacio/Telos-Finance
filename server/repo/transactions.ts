@@ -9,10 +9,6 @@ import {
 import prisma from "../../lib/prisma";
 import { ResponseStatus } from "../types/api";
 
-async function recalculateHoldingInfo(tx, walletId: string, holdingId: string) {
-  const transactions = await tx.transa;
-}
-
 export default class TransactionRepository {
   async recalculateAndUpdateHoldingInfo(
     tx,
@@ -87,16 +83,8 @@ export default class TransactionRepository {
     return await prisma.$transaction(async (tx) => {
       const existingHolding = await tx.holding.findFirst({
         where: {
-          OR: [
-            {
-              walletId: walletId,
-              ticker: assetData.ticker,
-            },
-            {
-              walletId: walletId,
-              name: assetData.name,
-            },
-          ],
+          walletId: walletId,
+          ticker: assetData.ticker,
         },
       });
 
@@ -160,6 +148,123 @@ export default class TransactionRepository {
     });
   }
 
+  async editTransaction(
+    walletId: string,
+    transactionId: string,
+    assetData: {
+      country: CountryCode;
+      currency: CurrencyCode;
+      exchange: string | undefined;
+      assetClass: AssetClass;
+      assetType: AssetType | undefined;
+      name: string;
+      ticker: string | undefined;
+      tradeDate: Date;
+      price: number;
+      quantity: number;
+      transactionType: TransactionType;
+    },
+  ) {
+    return await prisma.$transaction(async (tx) => {
+      const existingHolding = await tx.holding.findFirst({
+        where: {
+          walletId: walletId,
+          ticker: assetData.ticker,
+        },
+      });
+
+      if (!existingHolding) {
+        throw {
+          statusCode: ResponseStatus.NOT_FOUND,
+          statusMessage: "Holding not found",
+        };
+      }
+
+      const updatedTransaction = await tx.transaction.update({
+        where: {
+          id: transactionId,
+          walletId: walletId,
+        },
+        data: {
+          walletId: walletId,
+          holdingId: existingHolding.id,
+          type: assetData.transactionType,
+          quantity: assetData.quantity,
+          price: assetData.price,
+          currency: assetData.currency,
+          tradeDate: assetData.tradeDate,
+        },
+      });
+
+      await this.recalculateAndUpdateHoldingInfo(
+        tx,
+        walletId,
+        existingHolding.id,
+      );
+
+      if (!updatedTransaction) {
+        throw {
+          statusCode: ResponseStatus.INTERNAL_SERVER_ERROR,
+          statusMessage: "Failed to update transaction",
+        };
+      }
+
+      return updatedTransaction;
+    });
+  }
+
+  async deleteTransaction(transactionId: string) {
+    return await prisma.$transaction(async (tx) => {
+      const transaction = await tx.transaction.findUnique({
+        where: {
+          id: transactionId,
+        },
+      });
+
+      if (!transaction) {
+        throw {
+          statusCode: ResponseStatus.NOT_FOUND,
+          statusMessage: "Transaction not found",
+        };
+      }
+
+      const holding = await tx.holding.findUnique({
+        where: {
+          walletId: transaction.walletId,
+          id: transaction.holdingId,
+        },
+      });
+
+      if (!holding) {
+        throw {
+          statusCode: ResponseStatus.NOT_FOUND,
+          statusMessage: "Holding not found",
+        };
+      }
+
+      const deletedTransaction = await tx.transaction.delete({
+        where: {
+          id: transaction.id,
+        },
+      });
+
+      await this.recalculateAndUpdateHoldingInfo(
+        tx,
+        holding.walletId,
+        holding.id,
+      );
+
+      if (!deletedTransaction) {
+        throw {
+          statusCode: ResponseStatus.INTERNAL_SERVER_ERROR,
+          statusMessage: "Failed to delete transaction",
+        };
+      }
+
+      return deletedTransaction;
+    });
+  }
+
   async getTransactionsById(walletId: string, holdingId: string) {
     const transactions = await prisma.transaction.findMany({
       where: {
@@ -170,7 +275,7 @@ export default class TransactionRepository {
         Holding: true,
       },
       orderBy: {
-        createdAt: "desc",
+        tradeDate: "desc",
       },
     });
 

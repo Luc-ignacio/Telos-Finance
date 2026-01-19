@@ -1,6 +1,5 @@
-import brapi from "../../../lib/brapi";
-import type { QuoteRetrieveResponse } from "brapi/resources/quote.mjs";
-import HoldingRepository from "../../../repo/holdings";
+import brapi from "../../../../lib/brapi";
+import HoldingRepository from "../../../../repo/holdings";
 import type { FormattedHolding } from "~/types";
 
 const holdingRepo = new HoldingRepository();

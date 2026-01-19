@@ -137,89 +137,108 @@
           class="w-[50%] p-4 border border-gray-200 rounded-2xl flex flex-col gap-4"
         >
           <h2 class="font-bold">Transactions</h2>
-          <div v-for="transaction in holdingTransactions" :key="transaction.id">
-            <Card
-              :pt="{
-                root: {
-                  class:
-                    'rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-md',
-                },
-                content: {
-                  class: 'text-base text-gray-700',
-                },
-              }"
+          <div v-if="holdingTransactions.length">
+            <div
+              v-for="transaction in holdingTransactions"
+              :key="transaction.id"
             >
-              <template #content>
-                <div class="flex flex-col gap-1">
-                  <div class="flex items-center justify-between">
-                    <div class="flex gap-1 items-center">
-                      <p class="font-bold text-sm">
-                        {{ transaction.Holding.ticker }}
-                      </p>
-                      <p class="text-xs text-gray-500">
-                        – {{ transaction.Holding.name }}
-                      </p>
+              <Card
+                :pt="{
+                  root: {
+                    class:
+                      'rounded-2xl bg-white border border-gray-200 shadow-sm hover:shadow-md',
+                  },
+                  content: {
+                    class: 'text-base text-gray-700',
+                  },
+                }"
+              >
+                <template #content>
+                  <div class="flex flex-col gap-1">
+                    <div class="flex items-center justify-between">
+                      <div class="flex gap-1 items-center">
+                        <p class="font-bold text-sm">
+                          {{ transaction.Holding.ticker }}
+                        </p>
+                        <p class="text-xs text-gray-500">
+                          – {{ transaction.Holding.name }}
+                        </p>
+                      </div>
+
+                      <div class="flex gap-1">
+                        <Button
+                          icon="pi pi-ellipsis-v"
+                          size="small"
+                          severity="secondary"
+                          text
+                          @click="togglePopover($event, transaction)"
+                        />
+                      </div>
                     </div>
 
-                    <div class="flex gap-1">
-                      <Button
-                        icon="pi pi-ellipsis-v"
-                        size="small"
-                        severity="secondary"
-                        text
-                        @click="togglePopover($event)"
-                      />
-                    </div>
-                  </div>
-
-                  <div class="flex items-start justify-between">
-                    <div class="flex flex-col gap-1">
-                      <div
-                        class="text-xs font-sans font-semibold flex gap-1 items-center"
-                      >
+                    <div class="flex items-start justify-between">
+                      <div class="flex flex-col gap-1">
                         <div
-                          class="flex items-center rounded-full"
-                          :class="getTransactionClass(transaction.type)"
+                          class="text-xs font-sans font-semibold flex gap-1 items-center"
                         >
-                          <Icon
-                            :name="getTransactionTypeIcon(transaction.type)"
-                            size="20"
-                          />
+                          <div
+                            class="flex items-center rounded-full"
+                            :class="getTransactionClass(transaction.type)"
+                          >
+                            <Icon
+                              :name="getTransactionTypeIcon(transaction.type)"
+                              size="20"
+                            />
+                          </div>
+                          {{ getTransactionTypeLabel(transaction.type) }}
                         </div>
-                        {{ getTransactionTypeLabel(transaction.type) }}
+
+                        <span class="font-normal text-xs text-gray-500">
+                          {{ formatDate(transaction.tradeDate) }}
+                        </span>
                       </div>
 
-                      <span class="font-normal text-xs text-gray-500">
-                        {{ formatDate(transaction.tradeDate) }}
-                      </span>
-                    </div>
-
-                    <div class="flex flex-col gap-1">
-                      <div class="text-sm font-bold">
-                        {{
-                          formatPrice(
-                            Number(transaction.price * transaction.quantity),
-                            transaction.currency,
-                          )
-                        }}
-                      </div>
-                      <div class="text-xs text-gray-500">
-                        {{ Number(transaction.quantity).toFixed(2) }} x
-                        {{
-                          formatPrice(transaction.price, transaction.currency)
-                        }}
+                      <div class="flex flex-col gap-1">
+                        <div class="text-sm font-bold">
+                          {{
+                            formatPrice(
+                              Number(transaction.price * transaction.quantity),
+                              transaction.currency,
+                            )
+                          }}
+                        </div>
+                        <div class="text-xs text-gray-500">
+                          {{ Number(transaction.quantity).toFixed(2) }} x
+                          {{
+                            formatPrice(transaction.price, transaction.currency)
+                          }}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </template>
-            </Card>
+                </template>
+              </Card>
+            </div>
+          </div>
+
+          <div v-else class="flex items-center justify-center h-full">
+            <div class="flex flex-col gap-2 items-center text-gray-500">
+              <Icon
+                name="solar:sad-square-linear"
+                size="24"
+                class="text-gray-500"
+              />
+              <p class="text-sm text-gray-500">No transactions to display</p>
+            </div>
           </div>
         </div>
       </template>
     </Card>
 
-    <Popover ref="popoverRef">
+    <Popover
+      ref="popoverRef"
+      @show="selectedTransaction = popoverRef.transaction"
+    >
       <div class="flex flex-col gap-4">
         <Button
           icon="pi pi-pencil"
@@ -227,16 +246,37 @@
           label="Edit"
           severity="secondary"
           text
+          fluid
+          @click="transactionEditRef.dialogVisible = true"
         />
+
         <Button
           icon="pi pi-trash"
-          size="small"
           label="Delete"
+          size="small"
           severity="danger"
           text
+          fluid
+          @click="transactionDeleteRef.dialogVisible = true"
         />
       </div>
     </Popover>
+
+    <TransactionEdit
+      ref="transactionEditRef"
+      :walletId="walletId"
+      v-model:transaction="selectedTransaction"
+      :showButton="false"
+      @refresh="init()"
+      @resetSelectedTransaction="selectedTransaction = undefined"
+    />
+
+    <TransactionDelete
+      ref="transactionDeleteRef"
+      v-model:transaction="selectedTransaction"
+      :showButton="false"
+      @refresh="init()"
+    />
   </div>
 </template>
 
@@ -291,9 +331,14 @@ const init = async () => {
 
 const popoverRef = ref();
 
-const togglePopover = (event) => {
+const togglePopover = (event: Event, transaction: TransactionWithHoldings) => {
   popoverRef.value.toggle(event);
+  popoverRef.value.transaction = transaction;
 };
+
+const transactionEditRef = ref();
+const transactionDeleteRef = ref();
+const selectedTransaction = ref<TransactionWithHoldings>();
 
 const chartData = ref();
 const chartOptions = ref();

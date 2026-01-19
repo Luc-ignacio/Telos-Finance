@@ -11,7 +11,23 @@ export function useHoldings() {
     }
   };
 
+  const deleteHolding = async (holdingId: string) => {
+    try {
+      const response = await $fetch(
+        `/api/v1/holdings/${holdingId}/delete-holding`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return {
     getHoldingById,
+    deleteHolding,
   };
 }
