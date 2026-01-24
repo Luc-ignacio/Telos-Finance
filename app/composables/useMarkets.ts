@@ -13,8 +13,19 @@ export function useMarkets() {
     return stock;
   };
 
+  const getInterestRateCDI = async () => {
+    const cdi = await $fetch(
+      `/api/v1/markets/interest-rate/get-interest-rate-cdi`,
+      {
+        method: "GET",
+      },
+    );
+    return cdi;
+  };
+
   return {
     getAllStocks,
     getStockByTicker,
+    getInterestRateCDI,
   };
 }

@@ -19,7 +19,7 @@ export function useUtils() {
 
   const formatPrice = (
     price: Decimal | number | null | undefined,
-    currency: CurrencyCode
+    currency: CurrencyCode,
   ) => {
     const formattedPrice = Number(price).toLocaleString("pt-BR", {
       minimumFractionDigits: 2,

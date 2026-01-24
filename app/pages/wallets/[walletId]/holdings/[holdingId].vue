@@ -54,8 +54,7 @@
             v-if="holding"
             :pt="{
               root: {
-                class:
-                  'rounded-2xl bg-gray-100 shadow-sm hover:cursor-pointer hover:shadow-md transition-shadow',
+                class: 'rounded-2xl bg-gray-100 shadow-sm',
               },
               title: {
                 class: ' text-gray-700 flex items-center gap-4',
@@ -130,14 +129,13 @@
               </div>
             </template>
           </Card>
-          <Chart type="line" :data="chartData" :options="chartOptions" />
         </div>
 
         <div
           class="w-[50%] p-4 border border-gray-200 rounded-2xl flex flex-col gap-4"
         >
           <h2 class="font-bold">Transactions</h2>
-          <div v-if="holdingTransactions.length">
+          <div v-if="holdingTransactions.length" class="flex flex-col gap-4">
             <div
               v-for="transaction in holdingTransactions"
               :key="transaction.id"
@@ -340,69 +338,7 @@ const transactionEditRef = ref();
 const transactionDeleteRef = ref();
 const selectedTransaction = ref<TransactionWithHoldings>();
 
-const chartData = ref();
-const chartOptions = ref();
-
-const setChartData = () => {
-  const documentStyle = getComputedStyle(document.documentElement);
-
-  return {
-    labels: ["January", "February", "March", "April", "May", "June", "July"],
-    datasets: [
-      {
-        label: "First Dataset",
-        data: [65, 59, 80, 81, 56, 55, 40],
-        fill: false,
-        borderColor: documentStyle.getPropertyValue("--p-lime-500"),
-        tension: 0.4,
-      },
-    ],
-  };
-};
-const setChartOptions = () => {
-  const documentStyle = getComputedStyle(document.documentElement);
-  const textColor = documentStyle.getPropertyValue("--p-text-color");
-  const textColorSecondary = documentStyle.getPropertyValue(
-    "--p-text-muted-color",
-  );
-  const surfaceBorder = documentStyle.getPropertyValue(
-    "--p-content-border-color",
-  );
-
-  return {
-    maintainAspectRatio: false,
-    aspectRatio: 0.6,
-    plugins: {
-      legend: {
-        labels: {
-          color: textColor,
-        },
-      },
-    },
-    scales: {
-      x: {
-        ticks: {
-          color: textColorSecondary,
-        },
-        grid: {
-          color: surfaceBorder,
-        },
-      },
-      y: {
-        ticks: {
-          color: textColorSecondary,
-        },
-        grid: {
-          color: surfaceBorder,
-        },
-      },
-    },
-  };
-};
-
 onMounted(async () => {
   await init();
-  chartData.value = setChartData();
-  chartOptions.value = setChartOptions();
 });
 </script>

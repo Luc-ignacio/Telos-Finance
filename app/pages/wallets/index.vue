@@ -67,7 +67,13 @@
           </div>
 
           <div v-else>
-            {{ wallet.Holdings }}
+            <div class="w-96">
+              <Chart
+                type="doughnut"
+                :data="setChartData(wallet)"
+                :options="chartOptions"
+              />
+            </div>
           </div>
         </template>
       </Card>
@@ -92,7 +98,58 @@ const init = async () => {
   loading.value = false;
 };
 
+const chartData = ref();
+const chartOptions = ref();
+
+const setChartData = (wallet: WalletWithHoldings) => {
+  const documentStyle = getComputedStyle(document.documentElement);
+
+  return {
+    labels: wallet.Holdings?.map((item) => item.ticker),
+    datasets: [
+      {
+        label: wallet.name,
+        data: wallet.Holdings.map(
+          (item) => Number(item.quantity) * Number(item.avgPrice),
+        ),
+        backgroundColor: [
+          documentStyle.getPropertyValue("--p-cyan-500"),
+          documentStyle.getPropertyValue("--p-amber-500"),
+          documentStyle.getPropertyValue("--p-pink-500"),
+          documentStyle.getPropertyValue("--p-lime-500"),
+          documentStyle.getPropertyValue("--p-indigo-500"),
+        ],
+        hoverBackgroundColor: [
+          documentStyle.getPropertyValue("--p-cyan-400"),
+          documentStyle.getPropertyValue("--p-amber-400"),
+          documentStyle.getPropertyValue("--p-pink-400"),
+          documentStyle.getPropertyValue("--p-lime-400"),
+          documentStyle.getPropertyValue("--p-indigo-400"),
+        ],
+      },
+    ],
+  };
+};
+
+const setChartOptions = () => {
+  const documentStyle = getComputedStyle(document.documentElement);
+  const textColor = documentStyle.getPropertyValue("--p-text-color");
+
+  return {
+    plugins: {
+      legend: {
+        labels: {
+          cutout: "30%",
+          color: textColor,
+        },
+        position: "right",
+      },
+    },
+  };
+};
+
 onMounted(async () => {
   await init();
+  chartOptions.value = setChartOptions();
 });
 </script>
