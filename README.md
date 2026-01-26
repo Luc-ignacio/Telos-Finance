@@ -3,10 +3,12 @@
 **Telos Finance** is a modern personal finance and portfolio tracking platform designed to help users understand, organise, and grow their wealth.
 It allows users to manage wallets, track assets, record transactions, and monitor performance across different asset classes — all in a clean, scalable, and extensible architecture.
 
-<img width="1509" height="860" alt="Telos-Finance-Login" src="https://github.com/user-attachments/assets/2fff1bfe-7097-4e6a-8926-3e6c0217d4e9" />
-<img width="1511" height="861" alt="Telos-Finance-Markets" src="https://github.com/user-attachments/assets/0c33b119-5aec-43eb-a12c-9259aadff9ab" />
-<img width="1512" height="860" alt="Telos-Finance-Stock" src="https://github.com/user-attachments/assets/4e2e0b94-6188-4cce-839e-20be2e169ea3" />
-<img width="1511" height="860" alt="Telos-Finance-Wallet" src="https://github.com/user-attachments/assets/65d264e3-b7aa-4ec0-a1fa-b2a213760bad" />
+<img width="1447" height="1260" alt="Telos-Finance-Login" src="https://github.com/user-attachments/assets/5659bebd-61b3-40fc-87fd-d94e8f746596" />
+<img width="1449" height="1261" alt="Telos-Finance-Markets" src="https://github.com/user-attachments/assets/33d9bead-54bc-4e48-9d38-9d06ad35a932" />
+<img width="1448" height="1261" alt="Telos-Finance-Stock" src="https://github.com/user-attachments/assets/a13c5ec1-099d-4fc8-9763-a2c4cf412105" />
+<img width="1449" height="1261" alt="Telos-Finance-Wallet" src="https://github.com/user-attachments/assets/2c501e04-e8cb-4523-94c7-c235ce7a5342" />
+<img width="1448" height="1259" alt="Telos-Finance-Holding" src="https://github.com/user-attachments/assets/260e5872-fbcc-4e12-9512-e3418ff6052b" />
+
 
 ## 🌍 **Live Preview:** https://telos-finance.vercel.app/
 
