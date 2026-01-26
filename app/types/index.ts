@@ -30,3 +30,9 @@ export type FormattedHolding = Holding & {
   totalReturn: number;
   totalReturnPercentage: number;
 };
+
+export enum YieldIntervals {
+  YEAR_TO_DATE = "YEAR_TO_DATE",
+  TWELVE_MONTHS = "TWELVE_MONTHS",
+  LAST_YEAR = "LAST_YEAR",
+}

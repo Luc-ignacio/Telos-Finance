@@ -1,11 +1,16 @@
 import { ResponseStatus } from "~~/server/types/api";
 import MarketsRepository from "../../../../repo/markets";
+import { YieldIntervals } from "~/types";
 
 const marketsRepo = new MarketsRepository();
 
 export default defineEventHandler(async (event) => {
+  const { interval } = getQuery(event);
+
   try {
-    const cdi = await marketsRepo.getInterestRateCDI();
+    const cdi = await marketsRepo.getInterestRateCDI(
+      interval as YieldIntervals,
+    );
 
     if (!cdi) {
       throw createError({

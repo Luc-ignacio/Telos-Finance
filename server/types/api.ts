@@ -9,3 +9,22 @@ export enum ResponseStatus {
   FORBIDDEN = 403, // User is authenticated but does not have permission (Role based access)
   INTERNAL_SERVER_ERROR = 500, // An unexpected error occurred on the server
 }
+
+export type CDIData = {
+  data: string;
+  valor: string;
+};
+
+export type CDBYieldResult = {
+  businessDays: number;
+  calendarDays: number;
+  accumulatedFactor: number;
+  grossYield: number;
+  grossYieldData: Array<{ date: string; accumulatedGrossYield: number }>;
+  grossValue: number;
+  grossReturn: number;
+  taxRate: number;
+  tax: number;
+  netValue: number;
+  netYield: number;
+};

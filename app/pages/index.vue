@@ -2,12 +2,11 @@
   <div class="flex flex-col w-full gap-5 p-5 rounded-2xl bg-white shadow-sm">
     <h1>CDI Rate</h1>
 
-    {{ cdi }}
-
     <Select
-      v-model="selectedCity"
+      v-model="selectedYieldInterval"
       :options="intervals"
       optionLabel="label"
+      optionValue="value"
       placeholder="Select interval"
     />
 
@@ -21,19 +20,29 @@
 </template>
 
 <script lang="ts" setup>
+import { YieldIntervals } from "~/types";
+
 const { getInterestRateCDI } = useMarkets();
 
-const cdi = ref();
+const cdiData = ref();
+const cdbYieldData = ref();
 
-const selectedCity = ref();
+const selectedYieldInterval = ref<YieldIntervals>(YieldIntervals.TWELVE_MONTHS);
 const today = new Date();
 
 const intervals = ref([
-  { label: `Year To Date`, value: "YEAR_TO_DATE" },
-  { label: "12 Months", value: "12M" },
-  { label: "Start", value: "START" },
-  { label: `${today.getFullYear() - 1}`, value: "LAST_YEAR" },
+  { label: `Year To Date`, value: YieldIntervals.YEAR_TO_DATE },
+  { label: "12 Months", value: YieldIntervals.TWELVE_MONTHS },
+  { label: `${today.getFullYear() - 1}`, value: YieldIntervals.LAST_YEAR },
 ]);
+
+watch(selectedYieldInterval, async (newValue) => {
+  if (newValue) {
+    await fetchCDI();
+    chartData.value = setChartData();
+    chartOptions.value = setChartOptions();
+  }
+});
 
 const chartData = ref();
 const chartOptions = ref();
@@ -42,31 +51,30 @@ const setChartData = () => {
   const documentStyle = getComputedStyle(document.documentElement);
 
   return {
-    labels: [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ],
+    labels: cdbYieldData.value.grossYieldData.map((item) => item.date),
     datasets: [
       {
-        label: "CDI",
-        data: cdi.value.map((item) => item.valor),
+        label: "CDI Year",
+        data: cdbYieldData.value.grossYieldData.map(
+          (item) => item.accumulatedGrossYield,
+        ),
         fill: false,
+        yAxisID: "y",
         borderColor: documentStyle.getPropertyValue("--p-orange-500"),
-        tension: 0.5,
+        tension: 0.4,
+      },
+      {
+        label: "CDI Day",
+        data: cdiData.value.map((item) => item.valor),
+        fill: false,
+        yAxisID: "y1",
+        borderColor: documentStyle.getPropertyValue("--p-lime-500"),
+        tension: 0.4,
       },
     ],
   };
 };
+
 const setChartOptions = () => {
   const documentStyle = getComputedStyle(document.documentElement);
   const textColor = documentStyle.getPropertyValue("--p-text-color");
@@ -97,6 +105,20 @@ const setChartOptions = () => {
         },
       },
       y: {
+        type: "linear",
+        display: true,
+        position: "left",
+        ticks: {
+          color: textColorSecondary,
+        },
+        grid: {
+          color: surfaceBorder,
+        },
+      },
+      y1: {
+        type: "linear",
+        display: true,
+        position: "right",
         ticks: {
           color: textColorSecondary,
         },
@@ -108,10 +130,16 @@ const setChartOptions = () => {
   };
 };
 
-onMounted(async () => {
-  const response = await getInterestRateCDI();
-  cdi.value = response;
+const fetchCDI = async () => {
+  const { cdi, CDBYield } = await getInterestRateCDI(
+    selectedYieldInterval.value,
+  );
+  cdiData.value = cdi;
+  cdbYieldData.value = CDBYield;
+};
 
+onMounted(async () => {
+  await fetchCDI();
   chartData.value = setChartData();
   chartOptions.value = setChartOptions();
 });

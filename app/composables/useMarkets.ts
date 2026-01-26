@@ -1,3 +1,5 @@
+import type { YieldIntervals } from "~/types";
+
 export function useMarkets() {
   const getAllStocks = async () => {
     const stocksList = await $fetch(`/api/v1/markets/stocks/get-all-stocks`, {
@@ -13,11 +15,14 @@ export function useMarkets() {
     return stock;
   };
 
-  const getInterestRateCDI = async () => {
+  const getInterestRateCDI = async (interval: YieldIntervals) => {
     const cdi = await $fetch(
       `/api/v1/markets/interest-rate/get-interest-rate-cdi`,
       {
         method: "GET",
+        params: {
+          interval: interval,
+        },
       },
     );
     return cdi;
