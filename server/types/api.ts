@@ -15,7 +15,7 @@ export type CDIData = {
   valor: string;
 };
 
-export type CDBYieldResult = {
+export type CalculateYieldResult = {
   businessDays: number;
   calendarDays: number;
   accumulatedFactor: number;
@@ -27,4 +27,35 @@ export type CDBYieldResult = {
   tax: number;
   netValue: number;
   netYield: number;
+};
+
+export type FixedIncomeValueSingleTransactionResult = {
+  totalInvested: number;
+  totalGrossValue: number;
+  totalNetValue: number;
+  taxRate: number;
+  tax: number;
+  totalReturn: number;
+  totalReturnPercentage: number;
+};
+
+export type FixedIncomeValueMultipleTransactionsResult = {
+  totalInvested: number;
+  totalGrossValue: number;
+  totalNetValue: number;
+  totalTax: number;
+  totalGrossReturn: number;
+  totalNetReturn: number;
+  totalReturnPercentage: number;
+  applications: Array<{
+    date: Date;
+    invested: number;
+    grossValue: number;
+    netValue: number;
+    taxRate: number;
+    tax: number;
+    grossReturn: number;
+    netReturn: number;
+    returnPercentage: number;
+  }>;
 };

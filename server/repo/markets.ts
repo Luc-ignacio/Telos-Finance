@@ -1,5 +1,11 @@
 import { YieldIntervals } from "~/types";
-import { CDIData, CDBYieldResult } from "../types/api";
+import {
+  CDIData,
+  CalculateYieldResult,
+  FixedIncomeValueMultipleTransactionsResult,
+  FixedIncomeValueSingleTransactionResult,
+} from "../types/api";
+import { FixedIncomeIndexer, Holding, Transaction } from "@prisma/client";
 
 export default class MarketsRepository {
   static formatDate(date: Date) {
@@ -53,42 +59,36 @@ export default class MarketsRepository {
     return this.formatDate(yesterday);
   }
 
-  async getInterestRateCDI(interval: YieldIntervals) {
-    let startDate;
-    let endDate;
+  async fetchCDI(startDate: string, endDate: string): Promise<CDIData[]> {
+    try {
+      const cdi = (await $fetch(
+        `https://api.bcb.gov.br/dados/serie/bcdata.sgs.12/dados?formato=json&dataInicial=${startDate}&dataFinal=${endDate}`,
+        {
+          method: "GET",
+        },
+      )) as CDIData[];
 
-    if (interval === YieldIntervals.YEAR_TO_DATE) {
-      startDate = MarketsRepository.getCurrentYearStartDate();
-      endDate = MarketsRepository.getYesterdayDate();
-    } else if (interval === YieldIntervals.TWELVE_MONTHS) {
-      startDate = MarketsRepository.getTwelveMonthStartDate();
-      endDate = MarketsRepository.getYesterdayDate();
-    } else if (interval === YieldIntervals.LAST_YEAR) {
-      startDate = MarketsRepository.getLastYearStartDate();
-      endDate = MarketsRepository.getLastYearEndDate();
+      return cdi;
+    } catch (error) {
+      console.error("Error fetching CDI:", error);
+      throw error;
     }
+  }
 
-    const cdi = (await $fetch(
-      `https://api.bcb.gov.br/dados/serie/bcdata.sgs.12/dados?formato=json&dataInicial=${startDate}&dataFinal=${endDate}`,
-      {
-        method: "GET",
-      },
-    )) as CDIData[];
+  async fetchSELIC(startDate: string, endDate: string): Promise<CDIData[]> {
+    try {
+      const selic = (await $fetch(
+        `https://api.bcb.gov.br/dados/serie/bcdata.sgs.11/dados?formato=json&dataInicial=${startDate}&dataFinal=${endDate}`,
+        {
+          method: "GET",
+        },
+      )) as CDIData[];
 
-    let CDBYield;
-    if (startDate && endDate) {
-      const response = MarketsRepository.calculateCDBYield(
-        1000,
-        100,
-        cdi,
-        startDate,
-        endDate,
-      );
-
-      CDBYield = response as CDBYieldResult;
+      return selic;
+    } catch (error) {
+      console.error("Error fetching SELIC:", error);
+      throw error;
     }
-
-    return { cdi, CDBYield };
   }
 
   static calculateCalendarDays(startDate: string, endDate: string): number {
@@ -111,13 +111,13 @@ export default class MarketsRepository {
     return 0.15; // 15%
   }
 
-  static calculateCDBYield(
+  static calculateYield(
     initialValue: number,
     cdiPercentage: number,
     cdiData: CDIData[],
     startDate: string,
     endDate: string,
-  ): CDBYieldResult {
+  ): CalculateYieldResult {
     // STEP 1: Initialize accumulated factor at 1
     let accumulatedFactor = 1.0;
 
@@ -189,5 +189,182 @@ export default class MarketsRepository {
       netValue: Number(netValue.toFixed(2)),
       netYield: Number(netYield.toFixed(2)),
     };
+  }
+
+  async calculateFixedIncomeValueSingleTransaction(
+    totalInvested: number,
+    indexer: FixedIncomeIndexer,
+    indexerRate: number,
+    purchaseDate: Date,
+  ): Promise<FixedIncomeValueSingleTransactionResult> {
+    const startDate = MarketsRepository.formatDate(purchaseDate);
+    const endDate = MarketsRepository.getYesterdayDate();
+
+    try {
+      let indexData: CDIData[] = [];
+
+      // STEP 1: Fetch indexer data
+      if (indexer === FixedIncomeIndexer.CDI) {
+        indexData = await this.fetchCDI(startDate, endDate);
+      } else if (indexer === FixedIncomeIndexer.SELIC) {
+        indexData = await this.fetchSELIC(startDate, endDate);
+      } else if (indexer === FixedIncomeIndexer.IPCA) {
+        // TODO: Implement IPCA calculation
+        return {
+          totalInvested,
+          totalGrossValue: totalInvested,
+          totalNetValue: totalInvested,
+          taxRate: 0,
+          tax: 0,
+          totalReturn: 0,
+          totalReturnPercentage: 0,
+        };
+      } else if (indexer === FixedIncomeIndexer.FIXED_RATE) {
+        // TODO: Implement fixed rate calculation
+        return {
+          totalInvested,
+          totalGrossValue: totalInvested,
+          totalNetValue: totalInvested,
+          taxRate: 0,
+          tax: 0,
+          totalReturn: 0,
+          totalReturnPercentage: 0,
+        };
+      }
+
+      // Step 2: Calculate yield using existing method
+      const result = MarketsRepository.calculateYield(
+        totalInvested,
+        indexerRate,
+        indexData,
+        startDate,
+        endDate,
+      );
+
+      return {
+        totalInvested,
+        totalGrossValue: result.grossValue,
+        totalNetValue: result.netValue,
+        taxRate: result.taxRate,
+        tax: result.tax,
+        totalReturn: result.netValue - totalInvested,
+        totalReturnPercentage: result.netYield,
+      };
+    } catch (error) {
+      console.error("Error calculating application value:", error);
+      return {
+        totalInvested,
+        totalGrossValue: totalInvested,
+        totalNetValue: totalInvested,
+        taxRate: 0,
+        tax: 0,
+        totalReturn: 0,
+        totalReturnPercentage: 0,
+      };
+    }
+  }
+
+  async calculateFixedIncomeValueMultipleTransactions(
+    holding: Holding & { Transactions: Transaction[] },
+  ): Promise<FixedIncomeValueMultipleTransactionsResult> {
+    // Step 1: Get all BUY transactions
+    const buyTransactions = holding.Transactions.filter(
+      (transaction) => transaction.type === "BUY",
+    ).sort((a, b) => a.tradeDate.getTime() - b.tradeDate.getTime());
+
+    let totalInvested = 0;
+    let totalGrossValue = 0;
+    let totalNetValue = 0;
+    let totalTax = 0;
+    const applications = [];
+
+    for (const transaction of buyTransactions) {
+      const paidValue = Number(transaction.price);
+      totalInvested += paidValue;
+
+      const result = await this.calculateFixedIncomeValueSingleTransaction(
+        paidValue,
+        holding.fixedIncomeIndexer!,
+        Number(holding.fixedIncomeRate) || 100,
+        transaction.tradeDate,
+      );
+
+      totalGrossValue += result.totalGrossValue;
+      totalNetValue += result.totalNetValue;
+      totalTax += result.tax;
+
+      applications.push({
+        date: transaction.tradeDate,
+        invested: result.totalInvested,
+        grossValue: result.totalGrossValue,
+        netValue: result.totalNetValue,
+        taxRate: result.taxRate,
+        tax: result.tax,
+        grossReturn: result.totalGrossValue - result.totalInvested,
+        netReturn: result.totalReturn,
+        returnPercentage: result.totalReturnPercentage,
+      });
+    }
+
+    // Step 2: Subtract any redemptions
+    const redemptions = holding.Transactions.filter(
+      (t) => t.type === "REDEMPTION" || t.type === "MATURITY",
+    );
+
+    for (const redemption of redemptions) {
+      const redeemedAmount = Number(redemption.price);
+      totalNetValue -= redeemedAmount;
+      totalGrossValue -= redeemedAmount;
+      totalInvested -= redeemedAmount;
+    }
+
+    const totalGrossReturn = totalGrossValue - totalInvested;
+    const totalNetReturn = totalNetValue - totalInvested;
+    const totalReturnPercentage =
+      totalInvested > 0 ? (totalNetReturn / totalInvested) * 100 : 0;
+
+    return {
+      totalInvested,
+      totalGrossValue,
+      totalNetValue,
+      totalTax,
+      totalGrossReturn,
+      totalNetReturn,
+      totalReturnPercentage,
+      applications,
+    };
+  }
+
+  async getInterestRateCDI(interval: YieldIntervals) {
+    let startDate;
+    let endDate;
+
+    if (interval === YieldIntervals.YEAR_TO_DATE) {
+      startDate = MarketsRepository.getCurrentYearStartDate();
+      endDate = MarketsRepository.getYesterdayDate();
+    } else if (interval === YieldIntervals.TWELVE_MONTHS) {
+      startDate = MarketsRepository.getTwelveMonthStartDate();
+      endDate = MarketsRepository.getYesterdayDate();
+    } else if (interval === YieldIntervals.LAST_YEAR) {
+      startDate = MarketsRepository.getLastYearStartDate();
+      endDate = MarketsRepository.getLastYearEndDate();
+    }
+
+    const cdi = await this.fetchCDI(startDate!, endDate!);
+
+    let CDBYield;
+    if (startDate && endDate) {
+      const response = MarketsRepository.calculateYield(
+        1000,
+        100,
+        cdi,
+        startDate,
+        endDate,
+      );
+
+      CDBYield = response as CalculateYieldResult;
+    }
+
+    return { cdi, CDBYield };
   }
 }

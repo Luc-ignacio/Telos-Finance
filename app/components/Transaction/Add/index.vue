@@ -2,7 +2,7 @@
   <div>
     <Button
       icon="pi pi-plus-circle"
-      label="Add Transaction"
+      label="Add Holding"
       size="small"
       @click="dialogVisible = true"
     />
@@ -10,7 +10,7 @@
     <Dialog
       v-model:visible="dialogVisible"
       modal
-      header="Add Transaction"
+      header="Add Holding"
       :style="{ width: '50rem' }"
       :pt="{
         header: {
@@ -22,7 +22,7 @@
       }"
     >
       <div class="grid grid-cols-2 gap-4">
-        <p class="col-span-2">Enter the details of your transaction below.</p>
+        <p class="col-span-2">Enter the details of your investment below.</p>
 
         <BaseInputField label="Country" :isRequired="true">
           <Select
@@ -52,57 +52,36 @@
             v-model="form.assetType"
             :options="form.assetClass?.types"
             optionLabel="name"
-            class="w-full"
-          />
-        </BaseInputField>
-
-        <BaseInputField label="Asset Name" :isRequired="true">
-          <InputText type="text" v-model="form.name" fluid />
-        </BaseInputField>
-
-        <BaseInputField label="Asset Ticker" :isRequired="false">
-          <InputText type="text" v-model="form.ticker" fluid />
-        </BaseInputField>
-
-        <BaseInputField label="Trade Date" :isRequired="true">
-          <DatePicker
-            v-model="form.tradeDate"
-            showIcon
-            fluid
-            dateFormat="dd MM yy"
-            iconDisplay="input"
-          />
-        </BaseInputField>
-
-        <BaseInputField label="Trade Type" :isRequired="true">
-          <Select
-            v-model="form.transactionType"
-            :options="transactions"
-            optionLabel="name"
             optionValue="value"
             class="w-full"
           />
         </BaseInputField>
 
-        <BaseInputField label="Price" :isRequired="true">
-          <InputNumber
-            v-model="form.price"
-            :minFractionDigits="2"
-            :maxFractionDigits="2"
-            mode="currency"
-            :currency="form.country.currency"
-            fluid
-          />
-        </BaseInputField>
+        <TransactionAddStock
+          v-model:selectedAssetType="form.assetType"
+          v-model:selectedCurrency="form.country.currency"
+          v-model:assetName="form.name"
+          v-model:assetTicker="form.ticker"
+          v-model:quantity="form.quantity"
+          v-model:price="form.price"
+          v-model:tradeDate="form.tradeDate"
+          v-model:transactionType="form.transactionType"
+          class="grid grid-cols-2 gap-4 col-span-2"
+        />
 
-        <BaseInputField label="Quantity" :isRequired="true">
-          <InputNumber
-            v-model="form.quantity"
-            :minFractionDigits="0"
-            :maxFractionDigits="8"
-            fluid
-          />
-        </BaseInputField>
+        <TransactionAddFixedIncome
+          v-model:selectedAssetType="form.assetType"
+          v-model:selectedCurrency="form.country.currency"
+          v-model:assetName="form.name"
+          v-model:assetTicker="form.ticker"
+          v-model:price="form.price"
+          v-model:tradeDate="form.tradeDate"
+          v-model:transactionType="form.transactionType"
+          v-model:fixedIncomeIndexer="form.fixedIncomeIndexer"
+          v-model:fixedIncomeRate="form.fixedIncomeRate"
+          v-model:maturityDate="form.fixedIncomeMaturityDate"
+          class="grid grid-cols-2 gap-4 col-span-2"
+        />
 
         <div class="flex justify-end gap-2 mt-4 col-span-2">
           <Button
@@ -114,8 +93,8 @@
             icon="pi pi-times"
             :disabled="isSaving"
             @click="closeDialog"
-          >
-          </Button>
+          />
+
           <Button
             type="button"
             label="Save"
@@ -123,8 +102,7 @@
             icon="pi pi-check"
             :loading="isSaving"
             @click="saveAsset"
-          >
-          </Button>
+          />
         </div>
       </div>
     </Dialog>
@@ -132,12 +110,15 @@
 </template>
 
 <script lang="ts" setup>
-import type {
+import type { QuoteListResponse } from "brapi/resources/quote.mjs";
+import {
+  AssetClass,
   CountryCode,
   CurrencyCode,
   TransactionType,
 } from "@prisma/client";
-
+import type { HoldingFormInfo } from "~/types";
+const { getAllStocks } = useMarkets();
 const { addTransaction } = useTransactions();
 const toast = useToast();
 const emit = defineEmits(["refresh"]);
@@ -149,6 +130,7 @@ const props = defineProps({
   },
 });
 
+const loading = ref<boolean>();
 const isSaving = ref<boolean>(false);
 const dialogVisible = ref<boolean>(false);
 
@@ -170,15 +152,24 @@ const countries = [
   },
 ];
 
+const stocksList = ref<QuoteListResponse.Stock[]>();
+const fundsList = ref<QuoteListResponse.Stock[]>();
+
+const init = async () => {
+  loading.value = true;
+
+  const res = await getAllStocks();
+  stocksList.value = res.stocksList;
+  fundsList.value = res.fundsList;
+
+  loading.value = false;
+};
+
 const assetClasses = [
   {
     name: "Cash",
     value: "CASH",
     types: [
-      {
-        name: "Bond",
-        value: "BOND",
-      },
       {
         name: "Cash",
         value: "CASH",
@@ -234,7 +225,7 @@ const assetClasses = [
     value: "FUNDS",
     types: [
       {
-        name: "Funds",
+        name: "Fund",
         value: "FUND",
       },
     ],
@@ -244,51 +235,59 @@ const assetClasses = [
     value: "REAL_ESTATE",
     types: [
       {
-        name: "Real Estate",
+        name: "REIT",
         value: "REIT",
       },
     ],
   },
 ];
 
-const transactions = [
-  { name: "Buy", value: "BUY" },
-  { name: "Sell", value: "SELL" },
-  { name: "Dividend", value: "DIVIDEND" },
-  { name: "Interest", value: "INTEREST" },
-];
+const selectedStock = ref<(typeof stocksList.value)[number]>();
 
-const form = ref({
-  country: {
-    code: "BR" as CountryCode,
-    currency: "BRL" as CurrencyCode,
-  },
-  exchange: undefined,
-  assetClass: undefined,
-  assetType: undefined,
+watch(selectedStock, (newValue) => {
+  form.value.name = newValue?.name;
+  form.value.ticker = newValue?.stock;
+});
+
+const form = ref<HoldingFormInfo>({
   name: "",
   ticker: undefined,
-  tradeDate: new Date(),
-  price: undefined,
+  assetClass: undefined,
+  assetType: undefined,
+  country: {
+    code: CountryCode.BR,
+    currency: CurrencyCode.BRL,
+  },
+  exchange: undefined,
   quantity: undefined,
-  transactionType: "BUY" as TransactionType,
+  price: undefined,
+  fixedIncomeIndexer: undefined,
+  fixedIncomeRate: undefined,
+  fixedIncomePurchaseDate: undefined,
+  fixedIncomeMaturityDate: undefined,
+  tradeDate: new Date(),
+  transactionType: TransactionType.BUY,
 });
 
 const closeDialog = () => {
   form.value = {
-    country: {
-      code: "BR" as CountryCode,
-      currency: "BRL" as CurrencyCode,
-    },
-    exchange: undefined,
-    assetClass: undefined,
-    assetType: undefined,
     name: "",
     ticker: undefined,
-    tradeDate: new Date(),
-    price: undefined,
+    assetClass: undefined,
+    assetType: undefined,
+    country: {
+      code: CountryCode.BR,
+      currency: CurrencyCode.BRL,
+    },
+    exchange: undefined,
     quantity: undefined,
-    transactionType: "BUY" as TransactionType,
+    price: undefined,
+    fixedIncomeIndexer: undefined,
+    fixedIncomeRate: undefined,
+    fixedIncomePurchaseDate: undefined,
+    fixedIncomeMaturityDate: undefined,
+    tradeDate: new Date(),
+    transactionType: TransactionType.BUY,
   };
 
   dialogVisible.value = false;
@@ -296,6 +295,10 @@ const closeDialog = () => {
 
 const saveAsset = async () => {
   isSaving.value = true;
+
+  if (form.value.assetClass?.value === AssetClass.FIXED_INCOME) {
+    form.value.quantity = 1;
+  }
 
   if (
     !form.value.country ||
@@ -320,13 +323,17 @@ const saveAsset = async () => {
     currency: form.value.country.currency,
     exchange: form.value.exchange,
     assetClass: form.value.assetClass.value,
-    assetType: form.value.assetType?.value,
+    assetType: form.value.assetType,
     name: form.value.name.toUpperCase(),
     ticker: form.value.ticker,
     tradeDate: form.value.tradeDate,
     price: form.value.price,
     quantity: form.value.quantity,
     transactionType: form.value.transactionType,
+    fixedIncomeIndexer: form.value.fixedIncomeIndexer,
+    fixedIncomeRate: form.value.fixedIncomeRate,
+    fixedIncomePurchaseDate: form.value.tradeDate,
+    fixedIncomeMaturityDate: form.value.fixedIncomeMaturityDate,
   };
 
   try {
@@ -356,4 +363,8 @@ const saveAsset = async () => {
     isSaving.value = false;
   }
 };
+
+onMounted(async () => {
+  await init();
+});
 </script>

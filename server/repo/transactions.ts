@@ -3,6 +3,7 @@ import {
   AssetType,
   CountryCode,
   CurrencyCode,
+  FixedIncomeIndexer,
   Transaction,
   TransactionType,
 } from "@prisma/client";
@@ -15,6 +16,19 @@ export default class TransactionRepository {
     walletId: string,
     holdingId: string,
   ) {
+    const holding = await tx.holding.findUnique({
+      where: {
+        id: holdingId,
+      },
+    });
+
+    if (!holding) {
+      throw {
+        statusCode: ResponseStatus.NOT_FOUND,
+        statusMessage: "Holding not found",
+      };
+    }
+
     const transactions = await tx.transaction.findMany({
       where: {
         walletId: walletId,
@@ -24,9 +38,44 @@ export default class TransactionRepository {
         Holding: true,
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: "asc",
       },
     });
+
+    // If FIXED_INCOME, get total value
+    if (holding.class === AssetClass.FIXED_INCOME) {
+      const totalInvested = transactions
+        .filter(
+          (transaction: Transaction) =>
+            transaction.type === TransactionType.BUY,
+        )
+        .reduce(
+          (sum: number, transaction: Transaction) =>
+            sum + Number(transaction.price),
+          0,
+        );
+
+      const totalRedeemed = transactions
+        .filter(
+          (transaction: Transaction) =>
+            transaction.type === TransactionType.REDEMPTION ||
+            transaction.type === TransactionType.MATURITY,
+        )
+        .reduce(
+          (sum: number, transaction: Transaction) =>
+            sum + Number(transaction.price),
+          0,
+        );
+
+      await tx.holding.update({
+        where: { id: holdingId },
+        data: {
+          avgPrice: totalInvested - totalRedeemed,
+        },
+      });
+
+      return;
+    }
 
     let quantity = 0;
     let avgPrice = 0;
@@ -78,6 +127,10 @@ export default class TransactionRepository {
       price: number;
       quantity: number;
       transactionType: TransactionType;
+      fixedIncomeIndexer: FixedIncomeIndexer | undefined;
+      fixedIncomeRate: number | undefined;
+      fixedIncomePurchaseDate: Date | undefined;
+      fixedIncomeMaturityDate: Date | undefined;
     },
   ) {
     return await prisma.$transaction(async (tx) => {
@@ -101,6 +154,10 @@ export default class TransactionRepository {
             ticker: assetData.ticker,
             avgPrice: assetData.price,
             quantity: assetData.quantity,
+            fixedIncomeIndexer: assetData.fixedIncomeIndexer,
+            fixedIncomeRate: assetData.fixedIncomeRate,
+            fixedIncomePurchaseDate: assetData.fixedIncomePurchaseDate,
+            fixedIncomeMaturityDate: assetData.fixedIncomeMaturityDate,
           },
         });
 

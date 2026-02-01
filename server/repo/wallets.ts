@@ -20,7 +20,11 @@ export default class WalletRepository {
         id: walletId,
       },
       include: {
-        Holdings: true,
+        Holdings: {
+          include: {
+            Transactions: true,
+          },
+        },
       },
     });
 

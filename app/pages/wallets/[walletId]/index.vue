@@ -135,6 +135,10 @@
 
           <div v-for="holding in wallet.Holdings" :key="holding.id">
             <Card
+              v-if="
+                holding.class === AssetClass.EQUITY ||
+                holding.class === AssetClass.REAL_ESTATE
+              "
               :pt="{
                 root: {
                   class: 'rounded-2xl bg-gray-100 shadow-sm',
@@ -151,10 +155,18 @@
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-4">
                     <img
+                      v-if="holding?.quote?.logourl"
                       :src="holding?.quote?.logourl"
                       :alt="holding?.quote?.longName || 'Company logo'"
                       class="rounded-lg w-10"
                     />
+                    <img
+                      v-else
+                      src="assets/images/telos-finance-logo.png"
+                      alt="Telos Finance Logo"
+                      class="rounded-lg w-10"
+                    />
+
                     <div class="flex flex-col">
                       <h1 class="text-base font-semibold">
                         {{ holding.ticker }}
@@ -228,6 +240,105 @@
                 </div>
               </template>
             </Card>
+
+            <Card
+              v-if="holding.class === AssetClass.FIXED_INCOME"
+              :pt="{
+                root: {
+                  class: 'rounded-2xl bg-gray-100 shadow-sm',
+                },
+                title: {
+                  class: ' text-gray-700',
+                },
+                content: {
+                  class: 'text-base text-gray-700 mt-2',
+                },
+              }"
+            >
+              <template #title>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <img
+                      v-if="holding?.quote?.logourl"
+                      :src="holding?.quote?.logourl"
+                      :alt="holding?.quote?.longName || 'Company logo'"
+                      class="rounded-lg w-10"
+                    />
+                    <img
+                      v-else
+                      src="assets/images/telos-finance-logo.png"
+                      alt="Telos Finance Logo"
+                      class="rounded-lg w-10"
+                    />
+
+                    <div class="flex flex-col">
+                      <h1 class="text-base font-semibold">
+                        {{ holding.ticker }}
+                      </h1>
+                      <h2 class="text-xs uppercase">{{ holding.name }}</h2>
+                    </div>
+                  </div>
+
+                  <Button
+                    icon="pi pi-ellipsis-v"
+                    severity="secondary"
+                    text
+                    @click="togglePopover($event, holding)"
+                  />
+                </div>
+              </template>
+
+              <template #content>
+                <div class="flex items-center justify-between">
+                  <p>Invested</p>
+                  <p class="font-semibold">
+                    {{ formatPrice(holding.avgPrice, holding.currency) }}
+                  </p>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <p>Gross Value</p>
+                  <p class="font-semibold">
+                    {{ formatPrice(holding.grossValue, holding.currency) }}
+                  </p>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <p>Net Value</p>
+                  <p class="font-semibold">
+                    {{ formatPrice(holding.netValue, holding.currency) }}
+                  </p>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <p>Tax</p>
+                  <p class="font-semibold">
+                    {{ formatPrice(holding.totalTax, holding.currency) }}
+                  </p>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <p>Net Return</p>
+                  <p
+                    class="font-semibold"
+                    :class="getClass(holding.totalNetReturn)"
+                  >
+                    <i :class="getIcon(holding.totalNetReturn)" />
+                    {{
+                      formatPrice(
+                        formatTotalReturn(holding.totalNetReturn),
+                        holding.currency,
+                      )
+                    }}
+                    ({{
+                      formatTotalReturn(holding.totalReturnPercentage).toFixed(
+                        2,
+                      )
+                    }}%)
+                  </p>
+                </div>
+              </template>
+            </Card>
           </div>
         </div>
       </template>
@@ -275,6 +386,7 @@
 </template>
 
 <script lang="ts" setup>
+import { AssetClass } from "@prisma/client";
 import type { FormattedHolding, FormattedWallet } from "~/types";
 
 definePageMeta({

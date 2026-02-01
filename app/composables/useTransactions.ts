@@ -3,6 +3,7 @@ import type {
   AssetType,
   CountryCode,
   CurrencyCode,
+  FixedIncomeIndexer,
   TransactionType,
 } from "@prisma/client";
 
@@ -21,6 +22,10 @@ export function useTransactions() {
       price: number;
       quantity: number;
       transactionType: TransactionType;
+      fixedIncomeIndexer: FixedIncomeIndexer | undefined;
+      fixedIncomeRate: number | undefined;
+      fixedIncomePurchaseDate: Date | undefined;
+      fixedIncomeMaturityDate: Date | undefined;
     },
   ) => {
     try {
