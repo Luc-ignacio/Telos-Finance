@@ -69,35 +69,26 @@
             }"
           >
             <template #title>
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                  <img
-                    v-if="holding?.quote?.logourl"
-                    :src="holding?.quote?.logourl"
-                    :alt="holding?.quote?.longName || 'Company logo'"
-                    class="rounded-lg w-10"
-                  />
-                  <img
-                    v-else
-                    src="assets/images/telos-finance-logo.png"
-                    alt="Telos Finance Logo"
-                    class="rounded-lg w-10"
-                  />
-
-                  <div class="flex flex-col">
-                    <h1 class="text-base font-semibold">
-                      {{ holding.ticker }}
-                    </h1>
-                    <h2 class="text-xs uppercase">{{ holding.name }}</h2>
-                  </div>
-                </div>
-
-                <Button
-                  icon="pi pi-ellipsis-v"
-                  severity="secondary"
-                  text
-                  @click="togglePopover($event, holding)"
+              <div class="flex items-center gap-4">
+                <img
+                  v-if="holding?.quote?.logourl"
+                  :src="holding?.quote?.logourl"
+                  :alt="holding?.quote?.longName || 'Company logo'"
+                  class="rounded-lg w-10"
                 />
+                <img
+                  v-else
+                  src="assets/images/telos-finance-logo.png"
+                  alt="Telos Finance Logo"
+                  class="rounded-lg w-10"
+                />
+
+                <div class="flex flex-col">
+                  <h1 class="text-base font-semibold">
+                    {{ holding.ticker }}
+                  </h1>
+                  <h2 class="text-xs uppercase">{{ holding.name }}</h2>
+                </div>
               </div>
             </template>
 
@@ -168,41 +159,30 @@
             }"
           >
             <template #title>
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                  <img
-                    v-if="holding?.quote?.logourl"
-                    :src="holding?.quote?.logourl"
-                    :alt="holding?.quote?.longName || 'Company logo'"
-                    class="rounded-lg w-10"
-                  />
-                  <img
-                    v-else
-                    src="assets/images/telos-finance-logo.png"
-                    alt="Telos Finance Logo"
-                    class="rounded-lg w-10"
-                  />
-
-                  <div class="flex flex-col">
-                    <h1 class="text-base font-semibold">
-                      {{ holding.ticker }}
-                    </h1>
-                    <h2 class="text-xs uppercase">{{ holding.name }}</h2>
-                  </div>
-                </div>
-
-                <Button
-                  icon="pi pi-ellipsis-v"
-                  severity="secondary"
-                  text
-                  @click="togglePopover($event, holding)"
+              <div class="flex items-center gap-4">
+                <img
+                  v-if="holding?.quote?.logourl"
+                  :src="holding?.quote?.logourl"
+                  :alt="holding?.quote?.longName || 'Company logo'"
+                  class="rounded-lg w-10"
                 />
+                <img
+                  v-else
+                  src="assets/images/telos-finance-logo.png"
+                  alt="Telos Finance Logo"
+                  class="rounded-lg w-10"
+                />
+
+                <div class="flex flex-col">
+                  <h1 class="text-base font-semibold">
+                    {{ holding.ticker }}
+                  </h1>
+                  <h2 class="text-xs uppercase">{{ holding.name }}</h2>
+                </div>
               </div>
             </template>
 
             <template #content>
-              {{ holding }}
-
               <div class="flex items-center justify-between">
                 <p>Invested</p>
                 <p class="font-semibold">

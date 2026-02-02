@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
   if (!wallet) {
     throw createError({
       statusCode: ResponseStatus.NOT_FOUND,
-      statusMessage: "Failed to fetch wallet",
+      statusMessage: "Wallet not found",
     });
   }
 

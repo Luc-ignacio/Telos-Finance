@@ -7,6 +7,9 @@ export default class HoldingRepository {
       where: {
         id: holdingId,
       },
+      include: {
+        Transactions: true,
+      },
     });
 
     return holding;

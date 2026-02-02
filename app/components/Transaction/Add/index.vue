@@ -269,6 +269,15 @@ const form = ref<HoldingFormInfo>({
   transactionType: TransactionType.BUY,
 });
 
+watch(
+  () => form.value.assetClass,
+  (newValue, oldValue) => {
+    if (oldValue !== undefined) {
+      form.value.assetType = undefined;
+    }
+  },
+);
+
 const closeDialog = () => {
   form.value = {
     name: "",
